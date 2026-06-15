@@ -10,6 +10,9 @@ updated: 2026-06-14
 last_commit: 2026-06-14
 my_commits: 1
 total_commits: 1
+contributes_to:
+  - goal: local-llm-self-sufficiency
+    contribution: Agent coordination for task routing
 ---
 
 # agent-hub
@@ -27,6 +30,12 @@ total_commits: 1
 - Remote: (not pushed yet)
 - Branch: main
 - Local: ~/Documents/workspace/agent-hub
+
+## Goals
+
+| Goal | Contribution |
+|------|--------------|
+| [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Agent coordination for task routing |
 
 ## Description
 
