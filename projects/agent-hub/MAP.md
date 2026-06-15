@@ -13,6 +13,12 @@ total_commits: 1
 contributes_to:
   - goal: local-llm-self-sufficiency
     contribution: Agent coordination for task routing
+  - goal: unified-multi-machine-workflow
+    contribution: Core messaging between machines
+  - goal: remote-access-infra
+    contribution: Central hub accessible from all machines
+  - goal: multi-agent-coordination
+    contribution: Primary inter-agent communication system
 ---
 
 # agent-hub
@@ -36,6 +42,9 @@ contributes_to:
 | Goal | Contribution |
 |------|--------------|
 | [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Agent coordination for task routing |
+| [unified-multi-machine-workflow](../../goals/unified-multi-machine-workflow.md) | Core messaging between machines |
+| [remote-access-infra](../../goals/remote-access-infra.md) | Central hub accessible from all machines |
+| [multi-agent-coordination](../../goals/multi-agent-coordination.md) | Primary inter-agent communication system |
 
 ## Description
 

@@ -13,6 +13,10 @@ total_commits: 25
 contributes_to:
   - goal: local-llm-self-sufficiency
     contribution: Monitoring and dashboards for inference
+  - goal: unified-multi-machine-workflow
+    contribution: Cross-machine monitoring dashboard
+  - goal: remote-access-infra
+    contribution: Remote monitoring of all infrastructure
 ---
 
 # quasar-deck
@@ -36,3 +40,5 @@ contributes_to:
 | Goal | Contribution |
 |------|--------------|
 | [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Monitoring and dashboards for inference |
+| [unified-multi-machine-workflow](../../goals/unified-multi-machine-workflow.md) | Cross-machine monitoring dashboard |
+| [remote-access-infra](../../goals/remote-access-infra.md) | Remote monitoring of all infrastructure |

@@ -13,6 +13,8 @@ total_commits: 9
 contributes_to:
   - goal: local-llm-self-sufficiency
     contribution: Smart routing between local model sizes
+  - goal: multi-agent-coordination
+    contribution: Complexity-based routing between models
 ---
 
 # llm-router
@@ -36,3 +38,4 @@ contributes_to:
 | Goal | Contribution |
 |------|--------------|
 | [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Smart routing between local model sizes |
+| [multi-agent-coordination](../../goals/multi-agent-coordination.md) | Complexity-based routing between models |

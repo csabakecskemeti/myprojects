@@ -13,6 +13,10 @@ total_commits: 225
 contributes_to:
   - goal: local-llm-self-sufficiency
     contribution: Hardware setup and deployment
+  - goal: unified-multi-machine-workflow
+    contribution: DGX Spark cluster setup and access
+  - goal: remote-access-infra
+    contribution: Remote access to GPU infrastructure
 ---
 
 # dgx-spark-playbooks
@@ -36,3 +40,5 @@ contributes_to:
 | Goal | Contribution |
 |------|--------------|
 | [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Hardware setup and deployment |
+| [unified-multi-machine-workflow](../../goals/unified-multi-machine-workflow.md) | DGX Spark cluster setup and access |
+| [remote-access-infra](../../goals/remote-access-infra.md) | Remote access to GPU infrastructure |

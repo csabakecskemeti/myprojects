@@ -13,6 +13,8 @@ total_commits: 8
 contributes_to:
   - goal: local-llm-self-sufficiency
     contribution: Delegate simple tasks to local LLM
+  - goal: multi-agent-coordination
+    contribution: Routes tasks between cloud and local agents
 ---
 
 # cc-token-saver-mcp
@@ -36,3 +38,4 @@ contributes_to:
 | Goal | Contribution |
 |------|--------------|
 | [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Delegate simple tasks to local LLM |
+| [multi-agent-coordination](../../goals/multi-agent-coordination.md) | Routes tasks between cloud and local agents |
