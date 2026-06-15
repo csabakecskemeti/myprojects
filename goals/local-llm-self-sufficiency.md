@@ -1,0 +1,74 @@
+---
+slug: local-llm-self-sufficiency
+status: active
+priority: high
+created: 2026-06-14
+target_date:
+parent:
+---
+
+# Local LLM Self-Sufficiency
+
+## Description
+
+Be self-sufficient with LLM inference as much as possible. Maximize token generation locally and minimize reliance on cloud services.
+
+## Why It Matters
+
+- **Cost control**: Cloud API costs add up quickly with heavy usage
+- **Privacy**: Keep sensitive data and prompts local
+- **Availability**: Not dependent on external service uptime or rate limits
+- **Learning**: Deep understanding of LLM infrastructure and optimization
+- **Flexibility**: Full control over model selection, quantization, and deployment
+
+## The Reality
+
+SOTA cloud models (Claude, GPT-4, etc.) are significantly more capable for complex tasks. The strategy is hybrid:
+
+1. **Local for**: Simple tasks, bulk processing, embeddings, code completion, drafts
+2. **Cloud for**: Complex reasoning, SOTA performance, critical decisions
+3. **Offloading**: Cloud agents delegate subtasks to local LLMs/agents when appropriate
+
+## Success Criteria
+
+- [ ] Local inference infrastructure running 24/7
+- [ ] Multiple model sizes available (small/medium/large)
+- [ ] Agents can transparently route to local vs cloud based on task complexity
+- [ ] >50% of total token generation happens locally
+- [ ] Cost per token significantly lower than cloud-only approach
+- [ ] Latency acceptable for interactive use cases
+
+## Contributing Projects
+
+| Project | Status | Contribution |
+|---------|--------|--------------|
+| llmaas | active | Core local inference server |
+| quasar-deck | active | Monitoring and dashboards for inference |
+| dgx-spark-playbooks | active | Hardware setup and deployment |
+| agent-hub | active | Agent coordination for task routing |
+
+## Strategy
+
+### Phase 1: Infrastructure
+- Set up reliable local inference (vLLM, llama.cpp)
+- Multiple GPU nodes (DGX Spark cluster)
+- Monitoring and observability
+
+### Phase 2: Model Selection
+- Curate best models for different tasks
+- Optimize quantization vs quality tradeoffs
+- Benchmark against cloud models
+
+### Phase 3: Smart Routing
+- Build agent framework that decides local vs cloud
+- Task complexity estimation
+- Fallback and retry logic
+
+### Phase 4: Optimization
+- Maximize throughput
+- Minimize latency
+- Continuous improvement based on usage patterns
+
+## Progress Notes
+
+- 2026-06-14: Goal created, already have several related projects in progress
