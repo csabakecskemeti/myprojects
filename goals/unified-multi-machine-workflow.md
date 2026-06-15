@@ -4,7 +4,7 @@ status: active
 priority: high
 created: 2026-06-14
 target_date:
-parent:
+parent: ai-powered-income
 ---
 
 # Unified Multi-Machine Workflow
