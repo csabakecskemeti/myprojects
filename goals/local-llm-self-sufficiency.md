@@ -6,6 +6,7 @@ created: 2026-06-14
 target_date:
 parents:
   - ai-powered-income
+  - opensource-ai-community
 ---
 
 # Local LLM Self-Sufficiency

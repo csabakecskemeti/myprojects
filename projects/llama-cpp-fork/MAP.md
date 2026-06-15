@@ -13,6 +13,8 @@ total_commits: 6047
 contributes_to:
   - goal: local-llm-self-sufficiency
     contribution: Local LLM inference engine with Jamba fixes
+  - goal: opensource-ai-community
+    contribution: Contributing fixes back to llama.cpp
 ---
 
 # llama-cpp-fork

@@ -13,6 +13,8 @@ total_commits: 1
 contributes_to:
   - goal: local-llm-self-sufficiency
     contribution: Model evaluation and benchmarks
+  - goal: opensource-ai-community
+    contribution: Public benchmark results for community
 ---
 
 # lm-eval-results

@@ -13,6 +13,8 @@ total_commits: 3
 contributes_to:
   - goal: local-llm-self-sufficiency
     contribution: FP8 to BF16 dequantization for Mistral models
+  - goal: opensource-ai-community
+    contribution: Free quantization tools for community
 ---
 
 # ministral-3-dequantizer-fp8-bf16

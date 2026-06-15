@@ -13,6 +13,8 @@ total_commits: 6
 contributes_to:
   - goal: local-llm-self-sufficiency
     contribution: INT4 to BF16 dequantization for GGUF conversion
+  - goal: opensource-ai-community
+    contribution: Free quantization tools for community
 ---
 
 # dq-int4-to-bf16-dequant
