@@ -42,10 +42,11 @@ SOTA cloud models (Claude, GPT-4, etc.) are significantly more capable for compl
 
 | Project | Status | Contribution |
 |---------|--------|--------------|
-| llmaas | active | Core local inference server |
+| llmaas | backlog | Core local inference server |
 | quasar-deck | active | Monitoring and dashboards for inference |
-| dgx-spark-playbooks | active | Hardware setup and deployment |
+| dgx-spark-playbooks | backlog | Hardware setup and deployment |
 | agent-hub | active | Agent coordination for task routing |
+| local-claude-docker | active | Local Claude execution in containerized environment |
 
 ## Strategy
 

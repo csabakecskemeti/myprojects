@@ -6,10 +6,13 @@ repo: https://github.com/csabakecskemeti/claude-autopilot-sandbox
 has_git: true
 tags: [claude, docker, local]
 created: 2026-06-10
-updated: 2026-06-10
+updated: 2026-06-14
 last_commit: 2026-06-09
 my_commits: 33
 total_commits: 33
+contributes_to:
+  - goal: local-llm-self-sufficiency
+    contribution: Local Claude execution in containerized environment
 ---
 
 # local-claude-docker
@@ -27,3 +30,9 @@ total_commits: 33
 - Remote: https://github.com/csabakecskemeti/claude-autopilot-sandbox
 - Branch: feature/config-hardening
 - Local: ~/Documents/workspace/local-claude-docker
+
+## Goals
+
+| Goal | Contribution |
+|------|--------------|
+| [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Local Claude execution in containerized environment |
