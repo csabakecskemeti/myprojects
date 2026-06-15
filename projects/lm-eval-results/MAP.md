@@ -6,10 +6,13 @@ repo: https://github.com/csabakecskemeti/lm_eval_results
 has_git: true
 tags: [lm-eval, results, benchmark]
 created: 2026-06-10
-updated: 2026-06-10
+updated: 2026-06-14
 last_commit: 2025-01-25
 my_commits: 1
 total_commits: 1
+contributes_to:
+  - goal: local-llm-self-sufficiency
+    contribution: Model evaluation and benchmarks
 ---
 
 # lm-eval-results
@@ -27,3 +30,9 @@ total_commits: 1
 - Remote: https://github.com/csabakecskemeti/lm_eval_results
 - Branch: main
 - Local: ~/Documents/workspace/lm_eval_results
+
+## Goals
+
+| Goal | Contribution |
+|------|--------------|
+| [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Model evaluation and benchmarks |

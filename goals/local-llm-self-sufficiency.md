@@ -46,7 +46,22 @@ SOTA cloud models (Claude, GPT-4, etc.) are significantly more capable for compl
 | quasar-deck | active | Monitoring and dashboards for inference |
 | dgx-spark-playbooks | backlog | Hardware setup and deployment |
 | agent-hub | active | Agent coordination for task routing |
-| local-claude-docker | active | Local Claude execution in containerized environment |
+| claude-autopilot-sandbox | active | Local Claude execution in containerized environment |
+| llama-cpp-fork | backlog | Local LLM inference engine with Jamba fixes |
+| dq-int4-to-bf16-dequant | backlog | INT4 to BF16 dequantization for GGUF conversion |
+| ministral-3-dequantizer-fp8-bf16 | backlog | FP8 to BF16 dequantization for Mistral models |
+| llm-qlora | backlog | QLoRA fine-tuning for consumer GPUs |
+| unsloth-ft-example | backlog | Efficient Unsloth fine-tuning examples |
+| finetune-tutorials | backlog | Fine-tuning tutorials and examples |
+| hf-ddp-tutorial | backlog | Distributed training tutorials |
+| llm-router | backlog | Smart routing between local model sizes |
+| llm-forwarder | backlog | Proxy for routing to local LLM endpoints |
+| lorax | backlog | Multi-LoRA inference server |
+| cc-token-saver-mcp | backlog | Delegate simple tasks to local LLM |
+| ai-utils | backlog | LoRA utilities and model merging tools |
+| multi-gpu-dp-and-ddp-tests | backlog | Multi-GPU performance benchmarks |
+| merge-learn | backlog | Distributed learning with weight merging |
+| lm-eval-results | backlog | Model evaluation and benchmarks |
 
 ## Strategy
 
@@ -73,3 +88,4 @@ SOTA cloud models (Claude, GPT-4, etc.) are significantly more capable for compl
 ## Progress Notes
 
 - 2026-06-14: Goal created, already have several related projects in progress
+- 2026-06-14: Linked 20 contributing projects across inference, fine-tuning, routing, and tooling

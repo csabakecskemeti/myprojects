@@ -1,10 +1,10 @@
 ---
-slug: local-claude-docker
+slug: claude-autopilot-sandbox
 status: active
 role: owner
 repo: https://github.com/csabakecskemeti/claude-autopilot-sandbox
 has_git: true
-tags: [claude, docker, local]
+tags: [claude, docker, local, autopilot, sandbox]
 created: 2026-06-10
 updated: 2026-06-14
 last_commit: 2026-06-09
@@ -15,7 +15,7 @@ contributes_to:
     contribution: Local Claude execution in containerized environment
 ---
 
-# local-claude-docker
+# claude-autopilot-sandbox
 
 **Status:** active | **Role:** owner | **Commits:** 33/33
 
@@ -36,3 +36,7 @@ contributes_to:
 | Goal | Contribution |
 |------|--------------|
 | [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Local Claude execution in containerized environment |
+
+## Description
+
+Sandbox environment for running Claude Code in Docker containers with full autonomy. Includes supervisor integration, Langfuse tracing, and searxng for web search.

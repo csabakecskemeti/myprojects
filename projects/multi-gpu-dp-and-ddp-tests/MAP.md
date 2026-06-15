@@ -6,10 +6,13 @@ repo: https://github.com/csabakecskemeti/multi_gpu_dp_and_ddp_tests
 has_git: true
 tags: [python, pytorch, multi-gpu, dp, ddp, benchmarks]
 created: 2026-06-13
-updated: 2026-06-13
+updated: 2026-06-14
 last_commit: 2023-09-17
 my_commits: 3
 total_commits: 3
+contributes_to:
+  - goal: local-llm-self-sufficiency
+    contribution: Multi-GPU performance benchmarks
 ---
 
 # multi-gpu-dp-and-ddp-tests
@@ -27,3 +30,9 @@ total_commits: 3
 - Remote: https://github.com/csabakecskemeti/multi_gpu_dp_and_ddp_tests
 - Branch: main
 - Local: ~/Documents/workspace/multi_gpu_dp_and_ddp_tests
+
+## Goals
+
+| Goal | Contribution |
+|------|--------------|
+| [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Multi-GPU performance benchmarks |

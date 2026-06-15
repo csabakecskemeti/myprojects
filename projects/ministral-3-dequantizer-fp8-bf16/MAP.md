@@ -6,10 +6,13 @@ repo: https://github.com/csabakecskemeti/ministral-3_dequantizer_fp8-bf16
 has_git: true
 tags: [python, quantization, mistral, fp8, bf16, llama.cpp]
 created: 2026-06-13
-updated: 2026-06-13
+updated: 2026-06-14
 last_commit: 2025-12-05
 my_commits: 3
 total_commits: 3
+contributes_to:
+  - goal: local-llm-self-sufficiency
+    contribution: FP8 to BF16 dequantization for Mistral models
 ---
 
 # ministral-3-dequantizer-fp8-bf16
@@ -27,3 +30,9 @@ total_commits: 3
 - Remote: https://github.com/csabakecskemeti/ministral-3_dequantizer_fp8-bf16
 - Branch: main
 - Local: ~/Documents/workspace/ministral-3_dequantizer_fp8-bf16
+
+## Goals
+
+| Goal | Contribution |
+|------|--------------|
+| [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | FP8 to BF16 dequantization for Mistral models |

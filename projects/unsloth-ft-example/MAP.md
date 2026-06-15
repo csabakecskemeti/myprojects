@@ -6,10 +6,13 @@ repo: https://github.com/csabakecskemeti/unsloth_ft_example
 has_git: true
 tags: [python, fine-tuning, unsloth, lora, vicuna]
 created: 2026-06-13
-updated: 2026-06-13
+updated: 2026-06-14
 last_commit: 2024-11-28
 my_commits: 5
 total_commits: 5
+contributes_to:
+  - goal: local-llm-self-sufficiency
+    contribution: Efficient Unsloth fine-tuning examples
 ---
 
 # unsloth-ft-example
@@ -27,3 +30,9 @@ total_commits: 5
 - Remote: https://github.com/csabakecskemeti/unsloth_ft_example
 - Branch: main
 - Local: ~/Documents/workspace/merge_learn/unsloth_ft_example
+
+## Goals
+
+| Goal | Contribution |
+|------|--------------|
+| [local-llm-self-sufficiency](../../goals/local-llm-self-sufficiency.md) | Efficient Unsloth fine-tuning examples |
