@@ -4,7 +4,9 @@ status: active
 priority: high
 created: 2026-06-14
 target_date:
-parent: unified-multi-machine-workflow
+parents:
+  - unified-multi-machine-workflow
+  - ai-powered-income
 ---
 
 # Multi-Agent Coordination

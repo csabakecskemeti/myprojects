@@ -4,7 +4,8 @@ status: active
 priority: high
 created: 2026-06-14
 target_date:
-parent: ai-powered-income
+parents:
+  - ai-powered-income
 ---
 
 # Local LLM Self-Sufficiency

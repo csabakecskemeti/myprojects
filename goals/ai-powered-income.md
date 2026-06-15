@@ -4,7 +4,7 @@ status: active
 priority: critical
 created: 2026-06-14
 target_date:
-parent:
+parents: []
 ---
 
 # AI-Powered Income Generation
