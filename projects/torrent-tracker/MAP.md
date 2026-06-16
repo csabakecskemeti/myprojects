@@ -10,6 +10,9 @@ updated: 2026-06-13
 last_commit: 2025-08-26
 my_commits: 1
 total_commits: 1
+contributes_to:
+  - goal: opensource-ai-community
+    contribution: Decentralized model distribution infrastructure
 ---
 
 # torrent-tracker

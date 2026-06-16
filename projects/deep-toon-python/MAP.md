@@ -10,6 +10,9 @@ updated: 2026-06-10
 last_commit: 2025-11-09
 my_commits: 8
 total_commits: 8
+contributes_to:
+  - goal: opensource-ai-community
+    contribution: Deep learning cartoon stylization tools for community
 ---
 
 # deep-toon-python

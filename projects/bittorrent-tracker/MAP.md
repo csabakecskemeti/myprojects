@@ -10,6 +10,9 @@ updated: 2026-06-10
 last_commit: 2025-08-26
 my_commits: 4
 total_commits: 1253
+contributes_to:
+  - goal: opensource-ai-community
+    contribution: BitTorrent-based model registry for decentralized AI model sharing
 ---
 
 # bittorrent-tracker

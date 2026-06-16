@@ -1,6 +1,6 @@
 ---
 slug: acp-demo
-status: active
+status: archived
 role: owner
 repo: https://github.com/csabakecskemeti/acp_demo
 has_git: true
@@ -14,7 +14,7 @@ total_commits: 3
 
 # acp-demo
 
-**Status:** active | **Role:** owner | **Commits:** 3/3
+**Status:** archived | **Role:** owner | **Commits:** 3/3
 
 ## Quick Links
 
