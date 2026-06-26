@@ -5,7 +5,7 @@ Auto-generated index of all tracked projects.
 | Project | Status | Role | Last Commit |
 |---------|--------|------|-------------|
 <!-- PROJECTS_BEGIN -->
-| [acp-demo](./projects/acp-demo/MAP.md) | active | owner | 2026-06-10 |
+| [acp-demo](./projects/acp-demo/MAP.md) | archived | owner | 2026-06-10 |
 | [sandbox](./projects/sandbox/MAP.md) | active | owner | 2026-06-07 |
 | [local-claude-docker](./projects/local-claude-docker/MAP.md) | active | owner | 2026-06-09 |
 | [deep-agents-from-scratch](./projects/deep-agents-from-scratch/MAP.md) | active | user | - |
