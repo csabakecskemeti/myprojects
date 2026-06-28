@@ -5,10 +5,12 @@ Auto-generated index of all tracked projects.
 | Project | Status | Role | Last Commit |
 |---------|--------|------|-------------|
 <!-- PROJECTS_BEGIN -->
+| [gguf-quantizer-pipeline](./projects/gguf-quantizer-pipeline/MAP.md) | active | owner | 2026-06-27 |
 | [agent-hub](./projects/agent-hub/MAP.md) | active | owner | 2026-06-14 |
 | [quasar-deck](./projects/quasar-deck/MAP.md) | active | owner | 2026-06-12 |
 | [skill-vault](./projects/skill-vault/MAP.md) | active | owner | 2026-06-10 |
 | [claude-autopilot-sandbox](./projects/claude-autopilot-sandbox/MAP.md) | active | owner | 2026-06-09 |
+| [acp-demo](./projects/acp-demo/MAP.md) | active | owner | 2026-06-10 |
 | [sandbox](./projects/sandbox/MAP.md) | active | owner | 2026-06-07 |
 | [hybrid-trader](./projects/hybrid-trader/MAP.md) | active | owner | 2025-06-25 |
 | [deep-agents-from-scratch](./projects/deep-agents-from-scratch/MAP.md) | active | user | - |
