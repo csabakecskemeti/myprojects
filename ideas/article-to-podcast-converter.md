@@ -1,10 +1,10 @@
 ---
 slug: article-to-podcast-converter
-status: brainstorming
+status: converted
 created: 2026-06-20
-updated: 2026-06-20
+updated: 2026-06-29
 tags: [ai, podcast, tts, nlp, content-conversion]
-converted_to:
+converted_to: article-to-podcast-converter
 ---
 
 # Article-to-Podcast Converter

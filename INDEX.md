@@ -5,6 +5,7 @@ Auto-generated index of all tracked projects.
 | Project | Status | Role | Last Commit |
 |---------|--------|------|-------------|
 <!-- PROJECTS_BEGIN -->
+| [article-to-podcast-converter](./projects/article-to-podcast-converter/MAP.md) | active | owner | 2026-06-29 |
 | [gguf-quantizer-pipeline](./projects/gguf-quantizer-pipeline/MAP.md) | active | owner | 2026-06-27 |
 | [agent-hub](./projects/agent-hub/MAP.md) | active | owner | 2026-06-14 |
 | [quasar-deck](./projects/quasar-deck/MAP.md) | active | owner | 2026-06-12 |
