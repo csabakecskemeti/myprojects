@@ -14,6 +14,7 @@ registered: 2026-06-13
 | ai-articles | ~/Documents/workspace/ai_articles | 2025-05-26 |
 | ai-utils | ~/Documents/workspace/ai_utils | 2025-03-29 |
 | anyform | ~/Documents/workspace/anyform | 2025-01-07 |
+| article-to-podcast-converter | ~/Documents/workspace/article-to-podcast-converter | 2026-07-09 |
 | bee-stack | ~/Documents/workspace/iambee/bee-stack | 2025-01-19 |
 | cc-token-saver-mcp | ~/Documents/workspace/cc_token_saver_mcp | 2025-06-19 |
 | clipboard-mcp | ~/Documents/workspace/clipboard_mcp | 2025-08-09 |
