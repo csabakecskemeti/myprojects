@@ -1,9 +1,10 @@
 ---
 id: "001"
 title: Build evaluate.py dialogue quality harness
-status: active
+status: done
 priority: high
 created: 2026-07-19
+completed: 2026-07-19
 ---
 
 # Build evaluate.py dialogue quality harness
@@ -21,3 +22,17 @@ without a score, model and prompt changes are tuned on vibes.
 - [ ] Fidelity: claims unsupported by the article
 - [ ] Per-axis + overall score, so changes are A/B testable
 - [ ] Runs over the accumulated `podcast_raw.txt` corpus
+
+## Outcome (2026-07-19)
+
+Built. Coverage / drift / structure work and are trustworthy. Two axes did NOT
+land as planned:
+
+- **Chatter is unmeasurable by embeddings.** Cosine similarity measures vocabulary
+  overlap, so it ranks the best analogy in the episode as filler and a joke as
+  substance. Delegated to the LLM judge.
+- **Flow is blocked.** The local 8B judge returned byte-identical scores for a
+  real episode, a shuffled one, and a 6-turn fragment. `--judge-self-check` was
+  added to catch this; it currently FAILs.
+
+Full write-up: repo `docs/evaluation.md`.

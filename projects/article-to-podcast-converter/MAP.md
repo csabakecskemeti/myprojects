@@ -63,7 +63,10 @@ makes the TTS engine swappable. All artifacts land together in
 - [x] End-to-end CLI working on local vLLM
 - [ ] **Dialogue quality — the current weak point.** Coherent but doesn't read like
       real conversation. See [dialogue quality plan](./docs/dialogue-quality-plan.md)
-- [ ] Evaluation harness (`evaluate.py`) — blocks all other quality work
+- [x] Evaluation harness (`evaluate.py`) — coverage/drift/structure trustworthy;
+      chatter unmeasurable by embeddings, flow blocked on judge (repo docs/evaluation.md)
+- [ ] **Working LLM judge** — blocks the bake-off; local 8B judge fails self-check
+- [ ] **Fix front-loading** — measured: coverage declines start→end in every episode
 - [ ] Local GGUF model bake-off via LM Studio
 - [ ] Agentic web enrichment (reuse claude-autopilot-sandbox's searxng)
 - [ ] Expressive TTS (higgs-tts-3-4b)
@@ -76,3 +79,4 @@ exists but the working path is a local vLLM server behind LiteLLM.
 ## Internal Docs
 
 - [Dialogue quality plan](./docs/dialogue-quality-plan.md)
+- Detailed eval findings: repo `docs/evaluation.md`

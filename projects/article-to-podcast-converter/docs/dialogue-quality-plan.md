@@ -27,7 +27,22 @@ compound. Fix the measurement first.
 Better writing beats better voices: expressive TTS cannot rescue stiff dialogue, so
 higgs-tts is deliberately last despite being the most fun.
 
-## 1. Evaluation harness (`evaluate.py`)
+## 1. Evaluation harness (`evaluate.py`) — BUILT 2026-07-19
+
+> **Status: coverage/drift/structure working. Chatter proved unmeasurable by
+> embeddings. Flow blocked on a judge that can pass `--judge-self-check`.**
+> Full write-up is in the repo at `docs/evaluation.md` — design rationale, the
+> three failed implementations and why they failed, baseline table, next steps.
+>
+> Baseline: front-loading is real and **monotonic in all three episodes**
+> (coverage declines start->end without exception) and degrades with article
+> length: Cerebras 94.7%, RLHF 92.1%, MoE 70.8%.
+>
+> Blocker: the local 8B judge returned byte-identical scores for a real episode,
+> a shuffled one, and a 6-turn fragment. Needs ANTHROPIC_API_KEY or a larger
+> local non-reasoning model.
+
+### Original plan
 
 Score a `podcast.json` against its `raw_article.md` on four axes:
 
