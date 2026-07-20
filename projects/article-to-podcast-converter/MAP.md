@@ -4,22 +4,24 @@ status: active
 role: owner
 repo: https://github.com/csabakecskemeti/article-to-podcast-converter
 has_git: true
-tags: [python, ai, podcast, tts, claude, openai]
+tags: [python, ai, podcast, tts, kokoro, vllm, litellm, local-llm]
 created: 2026-06-29
-updated: 2026-06-29
-last_commit: 2026-06-29
-my_commits: 1
-total_commits: 1
+updated: 2026-07-19
+last_commit: 2026-07-19
+my_commits: 18
+total_commits: 18
 parents: []
 dependencies:
   hard: []
-  soft: []
-goals: []
+  soft:
+    - claude-autopilot-sandbox
+goals:
+  - local-llm-self-sufficiency
 ---
 
 # article-to-podcast-converter
 
-**Status:** active | **Role:** owner | **Commits:** 1/1
+**Status:** active | **Role:** owner | **Commits:** 18/18
 
 ## Quick Links
 
@@ -30,30 +32,47 @@ goals: []
 ## Repository
 
 - Remote: https://github.com/csabakecskemeti/article-to-podcast-converter
-- Branch: main
+- Branch: `feat/vllm-backend-e2e` (pushed, not yet merged to main)
 - Local: ~/Documents/workspace/article-to-podcast-converter
 
 ## Pipeline
 
 ```
-Article URL → trafilatura fetch → Claude dialogue generation → OpenAI TTS → MP3
+Article URL → raw_article.md → podcast.json → podcast.wav
+              (trafilatura)    (local LLM)     (Kokoro-82M)
 ```
+
+`podcast.json` is the handoff format between dialogue generation and TTS, which
+makes the TTS engine swappable. All artifacts land together in
+`articles/<slug>-<date>/`.
 
 ## Key Files
 
-- `convert.py` — CLI entrypoint (`--url`, `--text-only`)
-- `fetcher.py` — article URL → clean text (trafilatura)
-- `dialogue.py` — text → HOST/EXPERT script (Claude)
-- `synthesizer.py` — script → two-voice MP3 (OpenAI TTS: alloy + onyx)
+- `convert.py` — end-to-end CLI (`--url`, `--backend`, voices, names)
+- `fetcher.py` — article URL → clean markdown (trafilatura)
+- `dialogue.py` — article → `podcast.json` + `.md` + `_raw.txt`; backends: ollama / claude / litellm
+- `synthesizer.py` — `podcast.json` → two-voice WAV (Kokoro-82M)
 - `prompts/dialogue.txt` — prompt template
 
 ## Current State
 
-- [x] Initial project structure
 - [x] Article fetcher
-- [x] Dialogue generator (Claude)
-- [x] TTS synthesizer (OpenAI, two voices)
-- [x] CLI end-to-end
-- [ ] Test with real articles and tune prompt
-- [ ] Evaluate TTS voice quality
-- [ ] Error handling and edge cases
+- [x] Dialogue generator — Ollama, Claude, and LiteLLM/vLLM backends
+- [x] TTS synthesizer — Kokoro-82M local, two voices, WAV
+- [x] JSON pipeline (markdown → JSON handoff)
+- [x] End-to-end CLI working on local vLLM
+- [ ] **Dialogue quality — the current weak point.** Coherent but doesn't read like
+      real conversation. See [dialogue quality plan](./docs/dialogue-quality-plan.md)
+- [ ] Evaluation harness (`evaluate.py`) — blocks all other quality work
+- [ ] Local GGUF model bake-off via LM Studio
+- [ ] Agentic web enrichment (reuse claude-autopilot-sandbox's searxng)
+- [ ] Expressive TTS (higgs-tts-3-4b)
+
+## Notes
+
+Runs entirely on local inference — no cloud cost per episode. The Claude backend
+exists but the working path is a local vLLM server behind LiteLLM.
+
+## Internal Docs
+
+- [Dialogue quality plan](./docs/dialogue-quality-plan.md)
