@@ -24,3 +24,10 @@ unattended overnight runs this needs handling.
       ones and don't waste retries on the former
 - [ ] Batch summary line surfaces the failure count prominently — a run that ends
       with failures should not read as a clean finish
+
+## Update 2026-07-20
+
+Recurred on the top-videos playlist (3 of 24 failed, 2 transient). Also found a
+related lock bug: a stale .batch.lock whose PID had been reused by an unrelated
+process passed the liveness check, so a retry stalled at stage 1. Add a start
+timestamp or age check to acquire_lock so a reused PID can't wedge future runs.
