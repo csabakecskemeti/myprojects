@@ -80,3 +80,11 @@ exists but the working path is a local vLLM server behind LiteLLM.
 
 - [Dialogue quality plan](./docs/dialogue-quality-plan.md)
 - Detailed eval findings: repo `docs/evaluation.md`
+
+## Sub-tool: youtube-transcribe-diarize
+
+Self-contained, agent-agnostic tool (formerly `dataset/`). YouTube URL ->
+speaker-labeled dialogue JSON via WhisperX+pyannote (GPU) + LLM role assignment.
+Has its own AGENTS.md, CLAUDE.md, and two Agent Skills (setup, run) following the
+Anthropic skill standard. Designed to be usable by any agent and extractable to its
+own repo.
