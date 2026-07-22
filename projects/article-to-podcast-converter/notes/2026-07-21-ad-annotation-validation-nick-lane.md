@@ -57,3 +57,30 @@ time (a teaser clip vs the body) — a sign of one person split.
   panel count.
 - Sponsor-name extraction is unreliable ("sponsor: Nick Lane"); treat the sponsor
   field as best-effort, not authoritative.
+
+## UPDATE 2026-07-22 — generalized to block classifier; re-validated
+
+Per Csaba's reframe: don't "fix" the diarization split by merging; the real goal is
+to LABEL the non-conversational blocks regardless of speaker. Two mechanisms:
+speaker-level (a split intro/ad cluster -> ANNOUNCER role) and content-level (a
+block bundled into the host's voice -> found by reading the turns).
+
+Generalized `assign_roles_ads.py` from ad-only detection to a block classifier over
+kinds: ad / announcement / intro / trailer / signoff (None = conversation). Output
+now carries `blocks`, `block_kind_counts`, per-turn `block_kind`, with `ad_segments`
+as a convenience subset.
+
+Re-validated on Nick Lane:
+- **Ads: 3/3 real sponsors (Gemini/Sheets, LabelBox, Lighthouse), 0 false positives
+  -> precision 100% (was 60%), recall 100%.**
+- The two former false positives are now correctly TYPED, not suppressed:
+  intro [t2-3] -> `intro`, sign-off [t101] -> `signoff`.
+- Also caught an `announcement` [t97] (audience/channel plug).
+- 93/102 turns are clean conversation.
+
+So the intro/sign-off fix and the richer block annotation were the same change. The
+diarization split is no longer treated as an error to fix — whichever way a block
+lands (own cluster -> ANNOUNCER, or bundled -> content pass), it gets labelled.
+
+Minor residual: the cold-open teaser at t0-1 was folded into the intro block rather
+than typed `trailer`; boundary nuance, not a miss of substance.
