@@ -84,3 +84,33 @@ lands (own cluster -> ANNOUNCER, or bundled -> content pass), it gets labelled.
 
 Minor residual: the cold-open teaser at t0-1 was folded into the intro block rather
 than typed `trailer`; boundary nuance, not a miss of substance.
+
+## UPDATE 2026-07-22 (2) — content kind, multi-kind, trailer merge, reader fix
+
+Csaba's design refinements, all implemented and eyeballed on Nick Lane:
+
+- **`content` kind** replaces null: every turn now has explicit `kinds` list;
+  ordinary conversation is ["content"].
+- **Multi-kind per turn**, two sources both unioned:
+  1. partial boundary — the LLM flags a block's edge turn as also containing
+     conversation (e.g. an ad turn ending with the first real question -> ["ad","content"]).
+  2. overlapping blocks — a turn in two blocks gets both kinds. t39 (a channel
+     milestone that rolls into the Gemini sponsor read) came back ["ad","announcement"],
+     which is exactly right.
+- **trailer merged into intro** — a cold-open teaser and a spoken intro are one kind;
+  the model couldn't reliably separate them anyway.
+- **reader_role word-weighted** — fixed the intro=GUEST_1 bug (a 2-turn intro tied on
+  turn count; weighting by words correctly credits the HOST).
+
+Eyeball result on Nick Lane: 3/3 real sponsors, 0 ad false positives; intro/signoff
+correctly typed (not ads); t3=["intro","content"], t61=["ad","content"],
+t39=["ad","announcement"]. 90 pure-conversation / 5 pure-block / 7 mixed of 102.
+
+One prompt bug found and fixed along the way: my "our 101st episode" announcement
+example collided with t39's milestone framing and briefly stole the Gemini ad; added
+a rule that a paid third-party promo is "ad" even when it opens with channel news.
+
+Remaining soft spot: the signoff boundary can be greedy (LLM variance grouped the
+book-recommendation + genre discussion into signoff); partial_turns flags most of it
+as mixed, so it's labelled rather than silently wrong. Acceptable; --think tightens
+boundaries if needed.
