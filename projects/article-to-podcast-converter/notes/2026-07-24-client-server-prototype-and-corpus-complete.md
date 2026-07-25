@@ -50,8 +50,8 @@ Studio.
 
 ## How to continue (cold-start)
 
-1. Code branch `feat/podcast-server-chrome-ext` is **local-only** (commits
-   `864313e`, `868ca35`, `62d04c2`) unless pushed — survives reboot on disk.
+1. Code branch `feat/podcast-server-chrome-ext` is **pushed** to origin (commits
+   `864313e`, `868ca35`, `62d04c2`) — available on any machine.
 2. Read `docs/client-server.md` → Quickstart to run it; TODO section for next steps.
 3. Next biggest item: **per-turn streaming** (task 011). Then the **agent dialogue
    generator** (task 003).

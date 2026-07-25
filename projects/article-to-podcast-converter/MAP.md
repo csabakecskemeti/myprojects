@@ -32,8 +32,8 @@ goals:
 ## Repository
 
 - Remote: https://github.com/csabakecskemeti/article-to-podcast-converter
-- Branch: `feat/podcast-server-chrome-ext` (client–server prototype; **local-only,
-  not pushed**). `main` has the dataset docs. `feat/vllm-backend-e2e` +
+- Branch: `feat/podcast-server-chrome-ext` (client–server prototype; **pushed**,
+  not merged). `main` has the dataset docs. `feat/vllm-backend-e2e` +
   `feat/dialogue-eval-harness` still exist, not merged.
 - Local: ~/Documents/workspace/article-to-podcast-converter
 
