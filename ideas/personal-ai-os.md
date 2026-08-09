@@ -2,7 +2,7 @@
 slug: personal-ai-os
 status: researching
 created: 2026-08-08
-updated: 2026-08-08
+updated: 2026-08-09
 tags: [orchestration, multi-agent, multi-machine, privacy, local-llm, umbrella]
 converted_to:
 ---
@@ -85,6 +85,27 @@ scaffolding.
 article by email → enrich and link it to an active project → convert it to
 audio → listen while doing hardware work. Two existing projects already close
 that loop; nothing has connected them.
+
+## The Fleet
+
+Six machines, deliberately assigned roles — see
+[computers/README.md](../computers/README.md) for full detail.
+
+| Machine | Role | Inference tier |
+|---|---|---|
+| Mac Pro (2013 Xeon, 128 GB) | Desktop / daily driver | **none** — client only |
+| MacBook Pro (M5 Max, 128 GB) | Travel, steward failover | A |
+| AI workstation (RTX 5090 + RTX 6000 Pro, 1 TB DDR5) | Heavy compute, quantization | A |
+| DGX Spark ×2 (GB10, 121 GB each) | Local LLM inference (vLLM) | A |
+| OrangePi 5 Plus (RK3588) | Always-on services, rack display | C |
+
+Two findings that changed the design:
+
+- **The MacBook is tier A, not tier B.** 128 GB unified memory runs large
+  quantized models, so travelling with the rack off no longer degrades
+  capability. Tier B is now empty — the ladder is effectively A or C.
+- **The Mac Pro provides no inference at all.** Roles and tiers are
+  independent: the machine with the most checkouts is a pure client.
 
 ## Related Goals
 

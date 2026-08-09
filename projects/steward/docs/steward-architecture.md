@@ -2,7 +2,7 @@
 title: Steward Architecture
 status: draft
 created: 2026-08-08
-updated: 2026-08-08
+updated: 2026-08-09
 ---
 
 # Steward Architecture
@@ -74,7 +74,7 @@ Consequences that make the whole system tractable:
         │                         │                         │
   ┌─────▼─────┐            ┌──────▼──────┐           ┌──────▼──────┐
   │ OrangePi  │            │ AI Worksta. │           │  MacBook    │
-  │ tier C    │            │  tier A/B   │           │  tier B     │
+  │ tier C    │            │  tier A     │           │  tier A     │
   │ STEWARD ★ │            │             │           │  (failover) │
   └─────┬─────┘            └─────────────┘           └─────────────┘
         │ hosts
@@ -199,7 +199,7 @@ is the only component reachable in every scenario, so election happens there.
 holder: 4ebcb7c6dad2
 holder_name: macbook-pro
 hub_url: http://macbook.tail-scale-net.ts.net:8080
-tier: B
+tier: A
 claimed: 2026-08-08T14:02:11Z
 expires: 2026-08-08T14:12:11Z
 ---
@@ -265,12 +265,25 @@ Split every steward job in two:
 
 ### 6.2 Tiers and engines
 
+See [the fleet inventory](../../../computers/README.md) for full hardware and
+role assignment.
+
 | Tier | Host | Engine | Available when | Capabilities |
 |---|---|---|---|---|
-| **A** | DGX Spark cluster | **vLLM** | Cluster powered and reachable | Everything: cross-project linking, weekly review, deep enrichment |
-| **B** | MacBook (travel) | **llama.cpp** — via LM Studio, Ollama, or the native server | Machine awake | Capture tagging, dedup, daily "what next" |
-| **B** | AI workstation | vLLM or llama.cpp | Powered | Same as above, larger models |
-| **C** | OrangePi | llama.cpp (3–4B), or none | Always | Mechanical only |
+| **A** | DGX Spark ×2 (GB10, 121 GB each) | **vLLM** | Cluster powered and reachable | Everything: cross-project linking, weekly review, deep enrichment |
+| **A** | AI workstation (RTX 5090 + RTX 6000 Pro, 1 TB DDR5) | vLLM or llama.cpp | Powered | Same, plus quantization and fine-tuning |
+| **A** | MacBook Pro (**M5 Max, 128 GB unified**) | **llama.cpp** — LM Studio, Ollama, or native server | Machine awake | Full enrichment on large quantized models |
+| **C** | OrangePi 5 Plus (RK3588) | llama.cpp (3–4B), or none | Always | Mechanical only |
+| — | Mac Pro (2013 Xeon) | none | — | **Client only, never an inference provider** |
+
+**Revision (2026-08-09): the MacBook is tier A, not tier B.** 128 GB of unified
+memory runs large quantized models locally, so travelling with the rack powered
+down no longer degrades capability — capture *and* enrichment both run at full
+quality. Tier B is currently empty; the ladder is effectively A or C.
+
+This weakens the practical need for deferred enrichment without removing it:
+§6.3 still matters for the case where only the OrangePi is awake, but the
+common travel scenario is no longer degraded at all.
 
 ### 6.3 The router is a list of base URLs
 
@@ -285,11 +298,11 @@ tiers:
     base_url: http://dgx-1.ts.net:8000/v1
     engine: vllm
     model: <large>
-  - tier: B
+  - tier: A
     base_url: http://localhost:1234/v1     # LM Studio
     engine: llama.cpp
     model: <mid GGUF>
-  - tier: B
+  - tier: A
     base_url: http://localhost:11434/v1    # Ollama
     engine: llama.cpp
   - tier: C
@@ -359,7 +372,7 @@ No command syntax to remember at 11pm:
 | `steward+note@` | note on the best-matching project |
 | `steward+buy@` | household/shopping item |
 | `steward+private@` | straight to the vault, never classified, never promoted |
-| `steward@` | untyped — vault first, promoted only once classified clean (tier B+) |
+| `steward@` | untyped — vault first, promoted only once classified clean (tier A) |
 
 Subject → title. Body → note. URLs in body → fetched and enriched.
 
@@ -565,7 +578,7 @@ every 5 min:   renew or contest lease
                dedup, fetch metadata, write inbox records
                commit + push
 
-every 30 min:  if tier >= B: enrich pending items (tag, link)
+every 30 min:  if tier is A: enrich pending items (tag, link)
                promote completed handoffs to docs/
                commit + push
 

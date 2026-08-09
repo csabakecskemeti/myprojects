@@ -2,7 +2,7 @@
 title: Steward Use Cases
 status: draft
 created: 2026-08-08
-updated: 2026-08-08
+updated: 2026-08-09
 ---
 
 # Steward Use Cases
@@ -71,7 +71,7 @@ what makes Phase 1 mandatory before anything else.
 **Trigger:** UC-1 fired two weeks ago while travelling; DGX was powered off.
 
 **Flow:**
-1. Abroad, steward ran on the MacBook at **tier B** — or the OrangePi at
+1. Abroad, steward ran on the MacBook at **tier A** — or the OrangePi at
    tier C. Either way capture succeeded and the item was queued to
    `pending_enrichment`.
 2. Home. DGX comes up, health check promotes the router to **tier A**.
@@ -183,7 +183,8 @@ pre-commit scanner blocks a deliberate test secret.
    rejected and backs off.
 4. Writes its own `hub_url`, so agents discover the hub's new location by
    reading the lease.
-5. Capability drops to tier B. Mechanical work continues; reasoning defers.
+5. Capability drops to tier A on the MacBook (or C if only the OrangePi is
+   awake, in which case reasoning defers).
 6. OrangePi returns → reclaims at its 0s delay on next expiry.
 
 **Exercises:** lease protocol, priority via claim delay, service discovery,

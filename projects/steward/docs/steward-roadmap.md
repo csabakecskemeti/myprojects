@@ -2,7 +2,7 @@
 title: Steward Roadmap
 status: draft
 created: 2026-08-08
-updated: 2026-08-08
+updated: 2026-08-09
 ---
 
 # Steward Roadmap
@@ -163,7 +163,7 @@ different model and nothing is re-explained.
 
 **Deliverables**
 - [ ] 5 min: renew lease, drain mail, commit, push
-- [ ] 30 min: enrich if tier ≥ B, promote completed handoffs
+- [ ] 30 min: enrich if tier is A, promote completed handoffs
 - [ ] Daily 07:00: the **3-item** email, chosen by `next_action` + `effort` +
       `energy` + goal priority
 - [ ] Weekly: batched decay and review proposals, confirmed by reply
