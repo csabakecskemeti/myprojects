@@ -60,7 +60,11 @@ Create a seamless development experience across all personal machines where swit
 | agent-hub | active | Inter-agent messaging system |
 | dgx-spark-playbooks | backlog | DGX Spark setup and access |
 | quasar-deck | active | Monitoring across machines |
+| steward | draft | Single source of truth plus continuity across machines |
 
 ## Progress Notes
 
 - 2026-06-14: Goal created with 3 sub-goals
+- 2026-08-08: `steward` designed — see [roadmap](../projects/steward/docs/steward-roadmap.md).
+  Delivers "project state syncs automatically" and "pick up exactly where you
+  left off" via the projectz 0.8 decision layer and handoff records.

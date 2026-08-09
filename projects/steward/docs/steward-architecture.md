@@ -636,8 +636,8 @@ Steps 1–4 are worth doing even if the rest is never built.
 
 - [steward-roadmap.md](./steward-roadmap.md) — build order and acceptance criteria
 - [steward-usecases.md](./steward-usecases.md) — end-to-end scenarios
-- [multi-agent-coordination](../goals/multi-agent-coordination.md)
-- [unified-multi-machine-workflow](../goals/unified-multi-machine-workflow.md)
-- [remote-access-infra](../goals/remote-access-infra.md)
-- [local-llm-self-sufficiency](../goals/local-llm-self-sufficiency.md)
-- [sync-dev-environment](../goals/sync-dev-environment.md)
+- [multi-agent-coordination](../../../goals/multi-agent-coordination.md)
+- [unified-multi-machine-workflow](../../../goals/unified-multi-machine-workflow.md)
+- [remote-access-infra](../../../goals/remote-access-infra.md)
+- [local-llm-self-sufficiency](../../../goals/local-llm-self-sufficiency.md)
+- [sync-dev-environment](../../../goals/sync-dev-environment.md)

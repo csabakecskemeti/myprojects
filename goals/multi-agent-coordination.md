@@ -117,8 +117,12 @@ Any Agent: "This is a simple task, use local LLM"
 | cc-token-saver-mcp | backlog | Routes simple tasks to local LLM |
 | llm-router | backlog | Complexity-based routing |
 | skill-vault | active | Shareable skills for agent coordination |
+| steward | draft | Always-on coordinator: lease election, handoff records, cross-framework message contract |
 
 ## Progress Notes
 
 - 2026-06-14: Goal created as sub-goal of unified-multi-machine-workflow
 - 2026-06-14: agent-hub already deployed on OrangePi 5, basic messaging works
+- 2026-08-08: `steward` designed — see [architecture](../projects/steward/docs/steward-architecture.md).
+  Resolves "context sharing" and "agent discovery" via git-lease election plus
+  layer-1 handoff records. Blocked on hardening agent-hub (Phase 0).
