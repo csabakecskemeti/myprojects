@@ -234,12 +234,38 @@ counts managed blocks:
 
 ```
 HOST         PROMPT     ALIASES    RC-BLOCK SSH-BLOCK
-MacBook-Pro-2 ok         ok         3        1
-macpro       ok         ok         3        1
-opi          ok         ok         1        1
-spark-7ceb   ok         ok         2        1
-spark-db71   ok         ok         1        1
+MacBook-Pro-2 ok         ok         3/3      1
+macpro       ok         ok         3/3      1
+opi          ok         ok         1/1      1
+spark-7ceb   ok         ok         2/2      1
+spark-db71   ok         ok         1/1      1
 ```
+
+**Reading the columns.** *rc* is shell shorthand for **run-commands** — the
+startup files a shell reads (`~/.zshrc`, `~/.bashrc`, `~/.bash_profile`).
+RC-BLOCK is `files-with-block / rc-files-present`, so the denominator varies by
+machine: the OrangePi has only `.bashrc`, the Sparks have no `.bash_profile`.
+Every machine gets the block in *every* rc file it has, because which one a
+shell reads depends on the shell and whether the session is a login shell.
+
+A trailing `!` marks a file carrying **more than one** block. Counting
+`have/total` rather than summing matters: a bare sum reports `3` for both
+"3 files × 1 block" and "1 file × 3 blocks", and the second is precisely the
+duplicate case this check exists to catch — the one that already happened once
+with `claude-local`.
+
+The block itself is deliberately trivial:
+
+```sh
+# BEGIN fleet-managed -- generated, do not edit by hand
+# Source: myprojects/computers/  ·  regenerate, never hand-patch.
+[ -f ~/.fleet-prompt.sh ]  && . ~/.fleet-prompt.sh
+[ -f ~/.fleet-aliases.sh ] && . ~/.fleet-aliases.sh
+# END fleet-managed
+```
+
+All real content lives in the two sourced files, so updating the fleet means
+replacing those — never editing anything inside an rc file.
 
 Drift detection matters more than generation. Hand-deployment can never answer
 "is the fleet in the state I think it is" — this can, in one command.

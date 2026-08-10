@@ -26,10 +26,19 @@ check_local() {
   p=$(sum ~/.fleet-prompt.sh); a=$(sum ~/.fleet-aliases.sh)
   [ "$p" = "$REF_PROMPT" ] && ps="ok" || ps="DRIFT"
   [ "$a" = "$REF_ALIAS" ] && as="ok" || as="DRIFT"
-  rc=0; for f in ~/.zshrc ~/.bashrc ~/.bash_profile; do
-    [ -f "$f" ] && rc=$((rc + $(grep -c 'BEGIN fleet-managed' "$f")))
+  # Report have/total, and flag any file carrying more than one block -
+  # a bare sum cannot tell "3 files x 1" from "1 file x 3", which is the
+  # duplicate case this check exists to catch.
+  have=0; tot=0; dup=""
+  for f in ~/.zshrc ~/.bashrc ~/.bash_profile; do
+    [ -f "$f" ] || continue
+    tot=$((tot + 1)); n=$(grep -c 'BEGIN fleet-managed' "$f")
+    [ "$n" -ge 1 ] && have=$((have + 1))
+    [ "$n" -gt 1 ] && dup="!"
   done
-  sc=$(grep -c 'BEGIN fleet-managed' ~/.ssh/config 2>/dev/null || echo 0)
+  rc="$have/$tot$dup"
+  sn=$(grep -c 'BEGIN fleet-managed' ~/.ssh/config 2>/dev/null || echo 0)
+  [ "$sn" -gt 1 ] && sc="$sn!" || sc="$sn"
   printf "%-10s %-10s %-8s %-8s\n" "$ps" "$as" "$rc" "$sc"
 }
 
@@ -40,11 +49,16 @@ for h in $HOSTS; do
   ssh -o BatchMode=yes -o ConnectTimeout=5 "$h" '
     s() { [ -f "$1" ] && (shasum -a 256 "$1" 2>/dev/null || sha256sum "$1") | cut -c1-8 || echo "-------"; }
     p=$(s ~/.fleet-prompt.sh); a=$(s ~/.fleet-aliases.sh)
-    rc=0; for f in ~/.zshrc ~/.bashrc ~/.bash_profile; do
-      [ -f "$f" ] && rc=$((rc + $(grep -c "BEGIN fleet-managed" "$f")))
+    have=0; tot=0; dup=""
+    for f in ~/.zshrc ~/.bashrc ~/.bash_profile; do
+      [ -f "$f" ] || continue
+      tot=$((tot + 1)); n=$(grep -c "BEGIN fleet-managed" "$f")
+      [ "$n" -ge 1 ] && have=$((have + 1))
+      [ "$n" -gt 1 ] && dup="!"
     done
-    sc=$(grep -c "BEGIN fleet-managed" ~/.ssh/config 2>/dev/null || echo 0)
-    echo "$p $a $rc $sc"' 2>/dev/null | {
+    sn=$(grep -c "BEGIN fleet-managed" ~/.ssh/config 2>/dev/null || echo 0)
+    [ "$sn" -gt 1 ] && sc="$sn!" || sc="$sn"
+    echo "$p $a $have/$tot$dup $sc"' 2>/dev/null | {
     read -r p a rc sc
     if [ -z "$p" ]; then printf "%-10s\n" "UNREACHABLE"; else
       [ "$p" = "$REF_PROMPT" ] && ps="ok" || ps="DRIFT"
