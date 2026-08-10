@@ -28,6 +28,15 @@ FLEET = [
 ]
 MANAGED = {name for name, *_ in FLEET}
 
+# Emit IdentityFile only for keys that exist on THIS machine. The Macs and the
+# OrangePi carry id_rsa, the DGX Sparks carry id_ed25519. Listing both
+# unconditionally works, but ssh prints "no such identity: ..." on every
+# connection for the missing one - noise on every command.
+_CANDIDATES = ["id_ed25519", "id_rsa", "id_ecdsa"]
+IDENTITY_LINES = [f"    IdentityFile ~/.ssh/{k}" for k in _CANDIDATES
+                  if os.path.isfile(os.path.expanduser(f"~/.ssh/{k}"))] or \
+                 [f"    IdentityFile ~/.ssh/{k}" for k in ("id_ed25519", "id_rsa")]
+
 # Do not give a machine an alias pointing at itself.
 me = socket.gethostname().split('.')[0].lower()
 
@@ -42,11 +51,7 @@ def render():
                   f"    HostName {host}",
                   f"    User {user}",
                   f"    Port {port}",
-                  # List both key types: the Macs and OrangePi carry id_rsa,
-                  # the DGX Sparks carry id_ed25519. ssh skips ones that do
-                  # not exist, so one generated block works on every machine.
-                  "    IdentityFile ~/.ssh/id_ed25519",
-                  "    IdentityFile ~/.ssh/id_rsa",
+                  *IDENTITY_LINES,
                   "    IdentitiesOnly yes"]
     lines.append(END)
     return "\n".join(lines) + "\n"

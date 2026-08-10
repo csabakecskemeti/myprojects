@@ -23,10 +23,17 @@ BLOCK = f"""{BEGIN} -- generated, do not edit by hand
 {END}"""
 
 # Single-line items fleet-aliases.sh now owns.
+# NOTE: these MUST match to end-of-line. Matching only the prefix
+# (`alias ssh_opi=`) leaves the orphaned value (`"ssh opi"`) on its own line,
+# which the shell then tries to execute at every startup.
 LINE_PATTERNS = [
-    re.compile(r'^\s*alias\s+ssh_(opi|macpro|macbook|spark1|spark2)\s*=', re.M),
-    re.compile(r'^\s*export\s+LOCAL_LLM_(URL|MODEL)\s*=', re.M),
+    re.compile(r'^[ \t]*alias[ \t]+ssh_(opi|macpro|macbook|spark1|spark2)[ \t]*=.*$\n?', re.M),
+    re.compile(r'^[ \t]*export[ \t]+LOCAL_LLM_(URL|MODEL)[ \t]*=.*$\n?', re.M),
 ]
+
+# Repair for damage done by the earlier prefix-only patterns: a line holding
+# nothing but a quoted string is never valid shell.
+ORPHAN = re.compile(r'^[ \t]*(["\'])(?:(?!\1).)*\1[ \t]*$\n?', re.M)
 
 
 def strip_marker_block(text, begin, end):
@@ -78,6 +85,7 @@ def clean(path):
     text = strip_function(text, "fleet_llm_model")
     for pat in LINE_PATTERNS:
         text = pat.sub('', text)
+    text = ORPHAN.sub('', text)
 
     text = re.sub(r'\n{3,}', '\n\n', text).rstrip() + '\n'
     text += '\n' + BLOCK + '\n'

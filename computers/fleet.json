@@ -1,0 +1,112 @@
+{
+  "_comment": [
+    "Single source of truth for the fleet. Everything else in computers/ is",
+    "generated from or verified against this file.",
+    "JSON rather than YAML on purpose: python3 parses it everywhere, while",
+    "PyYAML is missing on the Mac Pro.",
+    "Contains addressing only - no keys. See 'Deliberately not in this repo'",
+    "in README.md."
+  ],
+  "machines": [
+    {
+      "name": "macpro",
+      "host": "Mac-Pro.local",
+      "user": "csabakecskemeti",
+      "port": 22,
+      "hardware": "Mac Pro 2013 (MacPro6,1), 12-core Xeon E5 2.7 GHz, 128 GB",
+      "os": "macOS 12.7.6",
+      "roles": ["desktop", "development"],
+      "tier": "none",
+      "prompt_color": 2,
+      "managed": true
+    },
+    {
+      "name": "macbook",
+      "host": "MacBook-Pro-2.local",
+      "user": "kecso",
+      "port": 22,
+      "hardware": "MacBook Pro (Mac17,7), M5 Max, 128 GB unified",
+      "os": "macOS 26.6",
+      "roles": ["travel", "development", "steward-failover"],
+      "tier": "A",
+      "prompt_color": 6,
+      "steward_claim_delay": 120,
+      "steward_requires_ac": true,
+      "managed": true
+    },
+    {
+      "name": "opi",
+      "host": "server-opi5p.local",
+      "user": "kecso",
+      "port": 22,
+      "hardware": "OrangePi 5 Plus, RK3588, ARM64",
+      "os": "Linux",
+      "roles": ["always-on", "services", "display", "steward-primary"],
+      "tier": "C",
+      "prompt_color": 3,
+      "steward_claim_delay": 0,
+      "services": ["agent-hub", "quasar-deck"],
+      "managed": true
+    },
+    {
+      "name": "spark-7ceb",
+      "host": "spark-7ceb.local",
+      "user": "kecso",
+      "port": 22,
+      "hardware": "NVIDIA GB10, 128 GB unified, 200 Gbps",
+      "os": "DGX OS",
+      "roles": ["inference"],
+      "tier": "A+",
+      "prompt_color": 5,
+      "endpoints": {"vllm": "http://spark-7ceb.local:8000"},
+      "vendor_managed": "NVIDIA Sync pins this host in its own ssh_config; do not rename",
+      "managed": true
+    },
+    {
+      "name": "spark-db71",
+      "host": "spark-db71.local",
+      "user": "kecso",
+      "port": 22,
+      "hardware": "NVIDIA GB10, 128 GB unified, 200 Gbps",
+      "os": "DGX OS",
+      "roles": ["inference", "llm-primary"],
+      "tier": "A+",
+      "prompt_color": 5,
+      "endpoints": {
+        "vllm": "http://spark-db71.local:8000",
+        "proxy": "http://spark-db71.local:4000"
+      },
+      "vendor_managed": "NVIDIA Sync pins this host in its own ssh_config; do not rename",
+      "managed": true
+    },
+    {
+      "name": "ws1",
+      "host": "workstation2deb12.local",
+      "user": "kecso",
+      "port": 22,
+      "hardware": "RTX 5090 + RTX 6000 Pro, 1 TB DDR5",
+      "os": "Debian 12",
+      "roles": ["heavy-compute", "quantization", "finetuning"],
+      "tier": "A++",
+      "prompt_color": 1,
+      "steward_claim_delay": 30,
+      "managed": true,
+      "note": "Usually powered off. Hostname bakes in the OS version - rename to ws1."
+    },
+    {
+      "name": "macpro-wan",
+      "host": "71.202.66.108",
+      "user": "csabakecskemeti",
+      "port": 8822,
+      "alias_only": true,
+      "managed": true,
+      "note": "External route to the Mac Pro. Retired once Tailscale is in place."
+    }
+  ],
+  "planned": [
+    {
+      "name": "spark-3 / spark-4",
+      "note": "Cluster extends to 4x GB10 once the QSFP switch arrives"
+    }
+  ]
+}
