@@ -7,6 +7,7 @@ including vendor-managed Include lines such as NVIDIA Sync's.
 
 Idempotent. Backs up before writing.
 """
+import json
 import os
 import re
 import shutil
@@ -16,16 +17,21 @@ import time
 BEGIN = "# BEGIN fleet-managed"
 END = "# END fleet-managed"
 
-# Single source of truth for the fleet's addressing.
-FLEET = [
-    ("macpro",     "Mac-Pro.local",            "csabakecskemeti", 22),
-    ("macbook",    "MacBook-Pro-2.local",      "kecso",           22),
-    ("opi",        "server-opi5p.local",       "kecso",           22),
-    ("spark-7ceb", "spark-7ceb.local",         "kecso",           22),
-    ("spark-db71", "spark-db71.local",         "kecso",           22),
-    ("ws1",        "workstation2deb12.local",  "kecso",           22),
-    ("macpro-wan", "71.202.66.108",            "csabakecskemeti", 8822),
-]
+# Machine list comes from fleet.json - the single source of truth. Looked for
+# next to this script, then ~/.fleet.json. JSON not YAML: python3 parses it on
+# every fleet host, PyYAML is missing on the Mac Pro.
+def load_fleet():
+    here = os.path.dirname(os.path.abspath(__file__))
+    for cand in (os.path.join(here, "fleet.json"),
+                 os.path.expanduser("~/.fleet.json")):
+        if os.path.isfile(cand):
+            data = json.load(open(cand))
+            return [(m["name"], m["host"], m["user"], m.get("port", 22))
+                    for m in data["machines"] if m.get("managed", True)], cand
+    raise SystemExit("error: fleet.json not found next to this script or at ~/.fleet.json")
+
+
+FLEET, FLEET_SRC = load_fleet()
 MANAGED = {name for name, *_ in FLEET}
 
 # Emit IdentityFile only for keys that exist on THIS machine. The Macs and the
@@ -43,7 +49,7 @@ me = socket.gethostname().split('.')[0].lower()
 
 def render():
     lines = [f"{BEGIN} -- generated, do not edit by hand",
-             "# Source: myprojects/computers/  ·  regenerate, never hand-patch."]
+             "# Source: myprojects/computers/fleet.json  ·  regenerate, never hand-patch."]
     for name, host, user, port in FLEET:
         if host.split('.')[0].lower() == me:
             continue

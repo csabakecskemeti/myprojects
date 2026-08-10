@@ -56,6 +56,24 @@ Both are exactly the class of error a declarative generator removes: it is not
 about saving keystrokes, it is that hand-editing N machines has no way to
 verify the result.
 
+## Progress toward it (2026-08-09)
+
+`computers/` is now a hand-rolled version of roughly half this idea:
+
+| fleetz concept | Exists today as |
+|---|---|
+| declarative inventory | `computers/fleet.json` |
+| generate ssh config | `fleet_ssh_install.py` (reads fleet.json) |
+| generate shell config | `fleet_rc_install.py` + two managed files |
+| `/fleetz apply` | `fleet-deploy.sh` |
+| `/fleetz check` | `fleet-check.sh` |
+| `/fleetz keys` | `fleet-bootstrap.sh` |
+| documentation | `computers/FLEET-MANAGEMENT.md` |
+
+What is still missing is the skill wrapper, the anonymised example inventory,
+and generating `README.md` and the prompt colour map from `fleet.json` rather
+than by hand. The remaining work is packaging, not design.
+
 ## Problem It Solves
 
 - Same alias should mean the same thing on every machine; today it does not

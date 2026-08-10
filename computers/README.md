@@ -112,194 +112,26 @@ exists. That is the argument for not renaming the rest.
 Decide before enrolling in Tailscale: MagicDNS uses the name registered at
 enrolment, so a rename afterwards means a second migration.
 
-## Shared shell environment
+## Management
 
-Three managed files, **identical on every machine**. Shell rc files contain
-nothing but a single marker block that sources them:
+How these machines are kept in sync — the managed files, the deploy and check
+tooling, common tasks, troubleshooting, and how to rebuild from scratch — is in
+**[FLEET-MANAGEMENT.md](./FLEET-MANAGEMENT.md)**.
 
-```sh
-# BEGIN fleet-managed -- generated, do not edit by hand
-# Source: myprojects/computers/  ·  regenerate, never hand-patch.
-[ -f ~/.fleet-prompt.sh ]  && . ~/.fleet-prompt.sh
-[ -f ~/.fleet-aliases.sh ] && . ~/.fleet-aliases.sh
-# END fleet-managed
-```
-
-| File | Contents | In repo |
-|---|---|---|
-| `~/.fleet-prompt.sh` | unified prompt, per-host colour, git branch | `computers/fleet-prompt.sh` |
-| `~/.fleet-aliases.sh` | ssh shortcuts, `claude-local`, `fleet_llm_model`, `LOCAL_LLM_*` | `computers/fleet-aliases.sh` |
-| `computers/fleet_rc_install.py` | strips hand-placed copies, installs the rc block | — |
-| `computers/fleet_ssh_install.py` | strips hand-written Host blocks, installs the ssh block | — |
-| `computers/fleet-check.sh` | verifies deployment and detects drift | — |
-| `computers/fleet_known_hosts_clean.py` | strips malformed `known_hosts` lines | — |
-
-**Why the marker block matters.** Fleet config was first deployed by appending
-directly to rc files, which silently produced *two* `claude-local` definitions
-on the MacBook — one with a hardcoded IP, one parametrised. Because the second
-definition wins in shell, the stale one was invisible until read by eye. With
-one managed block and everything else in sourced files, the installer strips
-prior copies and the state is verifiable with a single grep:
+Quick reference:
 
 ```sh
-grep -c 'BEGIN fleet-managed' ~/.zshrc ~/.bashrc ~/.bash_profile
+cd ~/myprojects/computers
+./fleet-check.sh        # is the fleet in the state I think it is?
+./fleet-deploy.sh       # push managed config everywhere
+./fleet-bootstrap.sh    # build passwordless SSH (keys, host keys)
 ```
 
-`fleet_rc_install.py` is idempotent, backs up before writing, and removes
-hand-placed `claude-local`, `ssh_*` aliases, `LOCAL_LLM_*` exports and the
-older `fleet-prompt` block wherever it finds them.
+`fleet.json` in this directory is the single source of truth for addressing.
+Edit it, then deploy — never hand-edit config on a machine.
 
-### `~/.fleet-prompt.sh` — unified prompt
-
-Layout is identical everywhere: `user@host ~/path (branch) %`
-
-**The host segment is colour-coded per machine.** With six boxes and constant
-SSH between them, the colour is a safety feature — it tells you which machine
-you are about to run a command on before you read the hostname.
-
-| Colour | Machine | Role |
-|---|---|---|
-| cyan | MacBook Pro | travel |
-| green | Mac Pro | desktop |
-| red | AI workstation | heavy compute |
-| magenta | DGX Sparks | inference cluster |
-| yellow | OrangePi 5 Plus | always-on |
-| blue | unknown host | — |
-
-Branch detection uses `git symbolic-ref`, never `git status` — on large repos
-(`llama.cpp`, `executorch`) status would make every prompt slow.
-
-### `~/.fleet-aliases.sh` — shared shortcuts and helpers
-
-- `ssh_macpro` · `ssh_macbook` · `ssh_opi` · `ssh_spark1` · `ssh_spark2` —
-  all call the ssh alias, never an address
-- `fleet_llm_model` — prints the model the cluster is currently serving
-- `claude-local` — runs Claude Code against that model via the LiteLLM proxy
-- `FLEET_LLM_HOST` — override the cluster host per machine before sourcing
-
-```
-$ claude-local
-Using model: deepseek-ai/DeepSeek-V4-Flash
-```
-
-**`LOCAL_LLM_MODEL` is deliberately unset.** Pinning a model name means it
-goes stale the moment the cluster loads something else. The `local-llm`
-skill-vault plugin now resolves the served model at call time. Export it only
-to force a specific model.
-
-> **Config in three places is how this broke.** The plugin read
-> `LOCAL_LLM_URL` / `LOCAL_LLM_MODEL` from **`~/.zshenv`** — a third copy,
-> beyond `~/.zshrc` and `~/.fleet-aliases.sh` — still holding the old IP and
-> `Qwen/Qwen3.6-35B-A3B-FP8`. Because `~/.zshenv` is sourced by *every* zsh,
-> those stale values were in the environment of every shell and won over
-> anything set later. Every call requested a model the cluster no longer
-> served. `~/.zshenv` has been cleared and the plugin fixed
-> (`skill-vault@b8a602b`); it now prefers `~/.fleet-aliases.sh`.
-
----
-
-## Fleet state and gaps
-
-### Connectivity matrix
-
-Verified 2026-08-09. Rows are the machine you are on, columns the target.
-
-|            | macpro | macbook | opi | spark-7ceb | spark-db71 |
-|------------|--------|---------|-----|------------|------------|
-| **macbook**   | OK   | –       | OK  | OK         | OK         |
-| **macpro**    | OK   | OK      | OK  | OK         | OK         |
-| **opi**       | OK   | OK      | –   | OK         | OK         |
-| **spark-7ceb**| OK   | OK      | OK  | –          | OK         |
-| **spark-db71**| OK   | OK      | OK  | OK         | –          |
-
-Full mesh — every machine reaches every other without a password or a host-key
-prompt.
-
-**Three separate distributions are required, and having only some produces
-confusing partial failures:**
-
-| Distribution | Without it |
-|---|---|
-| `~/.ssh/config` | alias does not resolve — "Could not resolve hostname macpro" |
-| `authorized_keys` | resolves, then falls back to a password prompt |
-| `known_hosts` | connects, but prompts to confirm the host key — fatal for unattended use |
-
-Each machine authenticates outbound with its **own** key: the Macs and the
-OrangePi carry `id_rsa`, the DGX Sparks carry `id_ed25519`. The generated ssh
-block therefore lists *both* `IdentityFile` paths — ssh skips ones that do not
-exist, so a single generated block works everywhere. Pinning only `id_rsa`
-with `IdentitiesOnly yes` silently left the Sparks with no usable identity.
-
-Host keys were seeded with `ssh-keyscan`, which is trust-on-first-use over the
-LAN. Acceptable here; re-seeding is required if a machine is rebuilt.
-
-### Verification
-
-`computers/fleet-check.sh` compares deployed files against the repo copies and
-counts managed blocks:
-
-```
-HOST         PROMPT     ALIASES    RC-BLOCK SSH-BLOCK
-MacBook-Pro-2 ok         ok         3/3      1
-macpro       ok         ok         3/3      1
-opi          ok         ok         1/1      1
-spark-7ceb   ok         ok         2/2      1
-spark-db71   ok         ok         1/1      1
-```
-
-**Reading the columns.** *rc* is shell shorthand for **run-commands** — the
-startup files a shell reads (`~/.zshrc`, `~/.bashrc`, `~/.bash_profile`).
-RC-BLOCK is `files-with-block / rc-files-present`, so the denominator varies by
-machine: the OrangePi has only `.bashrc`, the Sparks have no `.bash_profile`.
-Every machine gets the block in *every* rc file it has, because which one a
-shell reads depends on the shell and whether the session is a login shell.
-
-A trailing `!` marks a file carrying **more than one** block. Counting
-`have/total` rather than summing matters: a bare sum reports `3` for both
-"3 files × 1 block" and "1 file × 3 blocks", and the second is precisely the
-duplicate case this check exists to catch — the one that already happened once
-with `claude-local`.
-
-The block itself is deliberately trivial:
-
-```sh
-# BEGIN fleet-managed -- generated, do not edit by hand
-# Source: myprojects/computers/  ·  regenerate, never hand-patch.
-[ -f ~/.fleet-prompt.sh ]  && . ~/.fleet-prompt.sh
-[ -f ~/.fleet-aliases.sh ] && . ~/.fleet-aliases.sh
-# END fleet-managed
-```
-
-All real content lives in the two sourced files, so updating the fleet means
-replacing those — never editing anything inside an rc file.
-
-Drift detection matters more than generation. Hand-deployment can never answer
-"is the fleet in the state I think it is" — this can, in one command.
-
-### Deliberately not in this repo
-
-The fleet's **data** is excluded even though the tooling is committed:
-
-| Artefact | Why not here |
-|---|---|
-| collected public keys | identifies every machine and account in one file |
-| collected host keys | same, plus it is regenerable with `ssh-keyscan` |
-
-Public keys are not secrets, but they are exactly the "mildly sensitive
-inventory" case from [the `fleetz` idea](../ideas/fleetz.md): the generator is
-publishable, the fleet data is not. Once `myprojects-private` exists (Phase 2
-of the steward roadmap), that is where they belong. Regenerate both from the
-live fleet rather than storing them here.
-
-### Known gaps
-
-| Gap | Impact |
-|---|---|
-| Deployment is manual `scp` | repo and machines can silently diverge; `fleet-check.sh` detects it but nothing fixes it |
-| AI workstation has none of this | powered off — 5 of 6 machines covered |
-| Prompt colour map is a hardcoded `case` | duplicated on every box; should derive from inventory |
-| `.bak.*` files accumulate | every install leaves timestamped backups on every machine |
-| No declarative inventory yet | `FLEET` lives in `fleet_ssh_install.py`, not a data file — see [the `fleetz` idea](../ideas/fleetz.md) |
+Connectivity is a **full mesh**: every machine reaches every other without a
+password or prompt. Matrix and security notes in the management doc.
 
 ---
 
@@ -389,21 +221,17 @@ provide no inference at all.
 
 ## Open items
 
-- [ ] Deploy managed config to the AI workstation once powered on (`ws1` entry
-      already exists in `fleet_ssh_install.py`)
-- [ ] Prune accumulated `.bak.*` files fleet-wide
-- [ ] Tailscale across the fleet — retires `macpro-wan` and the LAN/WAN split
+- [ ] Rename `workstation2deb12` → `ws1` (only hostname with a real defect —
+      it bakes in the OS version)
+- [ ] Decide hostnames **before** Tailscale enrolment, not after
+- [ ] Deploy to the AI workstation once powered on (`ws1` entry already exists)
 - [ ] Confirm workstation GPU/RAM by probe once powered on
 - [ ] Register the workstation's `computers/<mac-id>.md` local paths after the
       next `/projectz scan` there
 - [ ] macOS 12.7.6 on the Mac Pro is EOL for security updates
-- [x] ~~`local-llm` skill-vault plugin should resolve the model at call time~~
-      — done, `skill-vault@b8a602b` (**not yet pushed**; it is a public
-      marketplace repo)
 - [ ] Decide whether the `local-llm` skill-vault plugin still earns its keep
       now that `claude-local` covers the same cluster
-- [ ] Rename `workstation2deb12` → `ws1` (only hostname with a real defect)
-- [ ] Decide hostnames **before** Tailscale enrolment, not after
-- [ ] Deploy the shared shell environment to the workstation once powered on
-- [ ] Generate all of this from a declarative inventory — see
-      [ideas/fleetz.md](../ideas/fleetz.md)
+- [ ] Spark cluster extends to 4× GB10 once the QSFP switch arrives
+
+Tooling gaps are tracked in
+[FLEET-MANAGEMENT.md](./FLEET-MANAGEMENT.md#8-known-gaps).
