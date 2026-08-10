@@ -42,6 +42,10 @@ def render():
                   f"    HostName {host}",
                   f"    User {user}",
                   f"    Port {port}",
+                  # List both key types: the Macs and OrangePi carry id_rsa,
+                  # the DGX Sparks carry id_ed25519. ssh skips ones that do
+                  # not exist, so one generated block works on every machine.
+                  "    IdentityFile ~/.ssh/id_ed25519",
                   "    IdentityFile ~/.ssh/id_rsa",
                   "    IdentitiesOnly yes"]
     lines.append(END)

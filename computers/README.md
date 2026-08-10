@@ -206,26 +206,31 @@ Verified 2026-08-09. Rows are the machine you are on, columns the target.
 |            | macpro | macbook | opi | spark-7ceb | spark-db71 |
 |------------|--------|---------|-----|------------|------------|
 | **macbook**   | OK   | –       | OK  | OK         | OK         |
-| **macpro**    | –    | FAIL    | OK  | OK         | OK         |
-| **opi**       | FAIL | FAIL    | –   | OK         | OK         |
-| **spark-7ceb**| FAIL | FAIL    | FAIL| –          | FAIL       |
-| **spark-db71**| FAIL | FAIL    | FAIL| FAIL       | –          |
+| **macpro**    | OK   | OK      | OK  | OK         | OK         |
+| **opi**       | OK   | OK      | –   | OK         | OK         |
+| **spark-7ceb**| OK   | OK      | OK  | –          | OK         |
+| **spark-db71**| OK   | OK      | OK  | OK         | –          |
 
-**This is hub-and-spoke from the MacBook, not a mesh.** `~/.ssh/config` is now
-distributed everywhere, so *name resolution* works fleet-wide — but keys were
-only ever pushed outward from the MacBook, so *authorization* is one-way.
-Config and keys are two separate distributions; having the first without the
-second produces aliases that resolve and then refuse.
+Full mesh — every machine reaches every other without a password or a host-key
+prompt.
 
-Whether a full mesh is wanted is an open decision. The architecture does not
-strictly need one: the steward's loop needs GitHub, IMAP and HTTP inference
-endpoints, none of which are SSH, and `agent-hub` task delegation is a *pull*
-model — the worker polls, so nothing needs to SSH into it. The gaps that
-actually bite are `opi → macpro` and `macpro → macbook`, both for
-administration rather than for the design.
+**Three separate distributions are required, and having only some produces
+confusing partial failures:**
 
-The Sparks reaching nothing is fine and arguably correct: they are pure
-inference targets, so nothing should originate there.
+| Distribution | Without it |
+|---|---|
+| `~/.ssh/config` | alias does not resolve — "Could not resolve hostname macpro" |
+| `authorized_keys` | resolves, then falls back to a password prompt |
+| `known_hosts` | connects, but prompts to confirm the host key — fatal for unattended use |
+
+Each machine authenticates outbound with its **own** key: the Macs and the
+OrangePi carry `id_rsa`, the DGX Sparks carry `id_ed25519`. The generated ssh
+block therefore lists *both* `IdentityFile` paths — ssh skips ones that do not
+exist, so a single generated block works everywhere. Pinning only `id_rsa`
+with `IdentitiesOnly yes` silently left the Sparks with no usable identity.
+
+Host keys were seeded with `ssh-keyscan`, which is trust-on-first-use over the
+LAN. Acceptable here; re-seeding is required if a machine is rebuilt.
 
 ### Verification
 
@@ -274,7 +279,6 @@ Drift detection matters more than generation. Hand-deployment can never answer
 
 | Gap | Impact |
 |---|---|
-| Keys are one-directional (see matrix) | `ssh_macpro` resolves but fails from opi and the Sparks |
 | Deployment is manual `scp` | repo and machines can silently diverge; `fleet-check.sh` detects it but nothing fixes it |
 | AI workstation has none of this | powered off — 5 of 6 machines covered |
 | Prompt colour map is a hardcoded `case` | duplicated on every box; should derive from inventory |
@@ -369,7 +373,6 @@ provide no inference at all.
 
 ## Open items
 
-- [ ] Decide whether to complete the SSH mesh (`opi → macpro`, `macpro → macbook`)
 - [ ] Deploy managed config to the AI workstation once powered on (`ws1` entry
       already exists in `fleet_ssh_install.py`)
 - [ ] Prune accumulated `.bak.*` files fleet-wide
