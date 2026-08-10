@@ -247,9 +247,10 @@ provide no inference at all.
 ## Open items
 
 - [ ] **Renumber the `192.168.200.2` collision** between the AI workstation's
-      `enp1s0f0np0` and spark-7ceb's `enp1s0f1np1`. Until then the workstation
-      must stay pinned to its LAN IP, and `ai-workstation.local` is unsafe to
-      use from either Spark
+      `enp1s0f0np0` and spark-7ceb's `enp1s0f1np1` — investigation, evidence and
+      the exact steps are in **[CLUSTER-FABRIC.md](./CLUSTER-FABRIC.md)**. Needs
+      root on the workstation. Until then it stays pinned to its LAN IP, and
+      `ai-workstation.local` is unsafe to use from either Spark
 - [ ] Give the workstation's `192.168.7.117` a DHCP reservation — it is pinned
       by address, so a lease change silently breaks `ws1`
 - [x] ~~Rename `workstation2deb12`~~ — now `AI-workstation` (2026-08-10)

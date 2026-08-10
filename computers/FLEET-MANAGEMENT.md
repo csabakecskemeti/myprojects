@@ -272,6 +272,9 @@ done
 here it would have papered over an IP conflict. Fix the address, or pin the
 machine to its LAN IP in `fleet.json` (which is what `ws1` does today).
 
+Full topology, evidence and the unresolved question of which port is cabled to
+what: **[CLUSTER-FABRIC.md](./CLUSTER-FABRIC.md)**.
+
 ### Letter case in hostnames
 
 Case is **irrelevant for reaching a host**: OpenSSH lowercases the target before
