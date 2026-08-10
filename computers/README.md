@@ -129,7 +129,9 @@ nothing but a single marker block that sources them:
 |---|---|---|
 | `~/.fleet-prompt.sh` | unified prompt, per-host colour, git branch | `computers/fleet-prompt.sh` |
 | `~/.fleet-aliases.sh` | ssh shortcuts, `claude-local`, `fleet_llm_model`, `LOCAL_LLM_*` | `computers/fleet-aliases.sh` |
-| `computers/fleet_rc_install.py` | strips hand-placed copies, installs the block | — |
+| `computers/fleet_rc_install.py` | strips hand-placed copies, installs the rc block | — |
+| `computers/fleet_ssh_install.py` | strips hand-written Host blocks, installs the ssh block | — |
+| `computers/fleet-check.sh` | verifies deployment and detects drift | — |
 
 **Why the marker block matters.** Fleet config was first deployed by appending
 directly to rc files, which silently produced *two* `claude-local` definitions
@@ -192,6 +194,66 @@ to force a specific model.
 > anything set later. Every call requested a model the cluster no longer
 > served. `~/.zshenv` has been cleared and the plugin fixed
 > (`skill-vault@b8a602b`); it now prefers `~/.fleet-aliases.sh`.
+
+---
+
+## Fleet state and gaps
+
+### Connectivity matrix
+
+Verified 2026-08-09. Rows are the machine you are on, columns the target.
+
+|            | macpro | macbook | opi | spark-7ceb | spark-db71 |
+|------------|--------|---------|-----|------------|------------|
+| **macbook**   | OK   | –       | OK  | OK         | OK         |
+| **macpro**    | –    | FAIL    | OK  | OK         | OK         |
+| **opi**       | FAIL | FAIL    | –   | OK         | OK         |
+| **spark-7ceb**| FAIL | FAIL    | FAIL| –          | FAIL       |
+| **spark-db71**| FAIL | FAIL    | FAIL| FAIL       | –          |
+
+**This is hub-and-spoke from the MacBook, not a mesh.** `~/.ssh/config` is now
+distributed everywhere, so *name resolution* works fleet-wide — but keys were
+only ever pushed outward from the MacBook, so *authorization* is one-way.
+Config and keys are two separate distributions; having the first without the
+second produces aliases that resolve and then refuse.
+
+Whether a full mesh is wanted is an open decision. The architecture does not
+strictly need one: the steward's loop needs GitHub, IMAP and HTTP inference
+endpoints, none of which are SSH, and `agent-hub` task delegation is a *pull*
+model — the worker polls, so nothing needs to SSH into it. The gaps that
+actually bite are `opi → macpro` and `macpro → macbook`, both for
+administration rather than for the design.
+
+The Sparks reaching nothing is fine and arguably correct: they are pure
+inference targets, so nothing should originate there.
+
+### Verification
+
+`computers/fleet-check.sh` compares deployed files against the repo copies and
+counts managed blocks:
+
+```
+HOST         PROMPT     ALIASES    RC-BLOCK SSH-BLOCK
+MacBook-Pro-2 ok         ok         3        1
+macpro       ok         ok         3        1
+opi          ok         ok         1        1
+spark-7ceb   ok         ok         2        1
+spark-db71   ok         ok         1        1
+```
+
+Drift detection matters more than generation. Hand-deployment can never answer
+"is the fleet in the state I think it is" — this can, in one command.
+
+### Known gaps
+
+| Gap | Impact |
+|---|---|
+| Keys are one-directional (see matrix) | `ssh_macpro` resolves but fails from opi and the Sparks |
+| Deployment is manual `scp` | repo and machines can silently diverge; `fleet-check.sh` detects it but nothing fixes it |
+| AI workstation has none of this | powered off — 5 of 6 machines covered |
+| Prompt colour map is a hardcoded `case` | duplicated on every box; should derive from inventory |
+| `.bak.*` files accumulate | every install leaves timestamped backups on every machine |
+| No declarative inventory yet | `FLEET` lives in `fleet_ssh_install.py`, not a data file — see [the `fleetz` idea](../ideas/fleetz.md) |
 
 ---
 
@@ -281,7 +343,10 @@ provide no inference at all.
 
 ## Open items
 
-- [ ] SSH alias for the AI workstation (currently powered off)
+- [ ] Decide whether to complete the SSH mesh (`opi → macpro`, `macpro → macbook`)
+- [ ] Deploy managed config to the AI workstation once powered on (`ws1` entry
+      already exists in `fleet_ssh_install.py`)
+- [ ] Prune accumulated `.bak.*` files fleet-wide
 - [ ] Tailscale across the fleet — retires `macpro-wan` and the LAN/WAN split
 - [ ] Confirm workstation GPU/RAM by probe once powered on
 - [ ] Register the workstation's `computers/<mac-id>.md` local paths after the
