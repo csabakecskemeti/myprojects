@@ -15,7 +15,10 @@
       "port": 22,
       "hardware": "Mac Pro 2013 (MacPro6,1), 12-core Xeon E5 2.7 GHz, 128 GB",
       "os": "macOS 12.7.6",
-      "roles": ["desktop", "development"],
+      "roles": [
+        "desktop",
+        "development"
+      ],
       "tier": "none",
       "prompt_color": 2,
       "managed": true
@@ -27,7 +30,11 @@
       "port": 22,
       "hardware": "MacBook Pro (Mac17,7), M5 Max, 128 GB unified",
       "os": "macOS 26.6",
-      "roles": ["travel", "development", "steward-failover"],
+      "roles": [
+        "travel",
+        "development",
+        "steward-failover"
+      ],
       "tier": "A",
       "prompt_color": 6,
       "steward_claim_delay": 120,
@@ -41,11 +48,19 @@
       "port": 22,
       "hardware": "OrangePi 5 Plus, RK3588, ARM64",
       "os": "Linux",
-      "roles": ["always-on", "services", "display", "steward-primary"],
+      "roles": [
+        "always-on",
+        "services",
+        "display",
+        "steward-primary"
+      ],
       "tier": "C",
       "prompt_color": 3,
       "steward_claim_delay": 0,
-      "services": ["agent-hub", "quasar-deck"],
+      "services": [
+        "agent-hub",
+        "quasar-deck"
+      ],
       "managed": true
     },
     {
@@ -55,12 +70,17 @@
       "port": 22,
       "hardware": "NVIDIA GB10, 128 GB unified, 200 Gbps",
       "os": "DGX OS",
-      "roles": ["inference"],
+      "roles": [
+        "inference"
+      ],
       "tier": "A+",
       "prompt_color": 5,
-      "endpoints": {"vllm": "http://spark-7ceb.local:8000"},
+      "endpoints": {
+        "vllm": "http://spark-7ceb.local:8000"
+      },
       "vendor_managed": "NVIDIA Sync pins this host in its own ssh_config; do not rename",
-      "managed": true
+      "managed": true,
+      "shell_alias": "ssh_spark1"
     },
     {
       "name": "spark-db71",
@@ -69,7 +89,10 @@
       "port": 22,
       "hardware": "NVIDIA GB10, 128 GB unified, 200 Gbps",
       "os": "DGX OS",
-      "roles": ["inference", "llm-primary"],
+      "roles": [
+        "inference",
+        "llm-primary"
+      ],
       "tier": "A+",
       "prompt_color": 5,
       "endpoints": {
@@ -77,21 +100,27 @@
         "proxy": "http://spark-db71.local:4000"
       },
       "vendor_managed": "NVIDIA Sync pins this host in its own ssh_config; do not rename",
-      "managed": true
+      "managed": true,
+      "shell_alias": "ssh_spark2"
     },
     {
       "name": "ws1",
-      "host": "workstation2deb12.local",
+      "host": "192.168.7.117",
+      "hostname": "ai-workstation.local",
       "user": "kecso",
       "port": 22,
-      "hardware": "RTX 5090 + RTX 6000 Pro, 1 TB DDR5",
-      "os": "Debian 12",
-      "roles": ["heavy-compute", "quantization", "finetuning"],
+      "hardware": "RTX PRO 6000 Blackwell 96 GB + RTX 5090 32 GB, 1 TB DDR5",
+      "os": "Ubuntu 26.04 LTS",
+      "roles": [
+        "heavy-compute",
+        "quantization",
+        "finetuning"
+      ],
       "tier": "A++",
       "prompt_color": 1,
       "steward_claim_delay": 30,
       "managed": true,
-      "note": "Usually powered off. Hostname bakes in the OS version - rename to ws1."
+      "note": "Renamed from workstation2deb12 (2026-08-10); that name no longer resolves. Pinned to the LAN IP on purpose: this host also holds 192.168.200.2 on the QSFP fabric, which COLLIDES with spark-7ceb's enp1s0f1np1. mDNS on the Sparks therefore returns the fabric address for ai-workstation.local and lands on the wrong machine. Restore the hostname once the collision is renumbered. Usually powered off."
     },
     {
       "name": "macpro-wan",

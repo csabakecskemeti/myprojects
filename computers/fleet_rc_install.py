@@ -27,7 +27,9 @@ BLOCK = f"""{BEGIN} -- generated, do not edit by hand
 # (`alias ssh_opi=`) leaves the orphaned value (`"ssh opi"`) on its own line,
 # which the shell then tries to execute at every startup.
 LINE_PATTERNS = [
-    re.compile(r'^[ \t]*alias[ \t]+ssh_(opi|macpro|macbook|spark1|spark2)[ \t]*=.*$\n?', re.M),
+    # Any ssh_* alias, not an enumerated list: the fleet owns that namespace,
+    # and hardcoding names meant every new machine needed this line edited.
+    re.compile(r'^[ \t]*alias[ \t]+ssh_[A-Za-z0-9_.-]+[ \t]*=.*$\n?', re.M),
     re.compile(r'^[ \t]*export[ \t]+LOCAL_LLM_(URL|MODEL)[ \t]*=.*$\n?', re.M),
 ]
 

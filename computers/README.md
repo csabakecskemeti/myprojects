@@ -1,6 +1,6 @@
 ---
 title: Machine Fleet
-updated: 2026-08-09
+updated: 2026-08-10
 ---
 
 # Machine Fleet
@@ -18,7 +18,7 @@ fleet**, including infrastructure nodes that host no repos.
 |---|---|---|---|---|
 | **Mac Pro** | 2013 (MacPro6,1), 12-core Xeon E5 2.7 GHz, 128 GB | macOS 12.7.6 | Desktop / daily driver | **none** — client only |
 | **MacBook Pro** | Mac17,7, **M5 Max, 128 GB** unified | macOS 26.6 | Travel, mobile dev, steward failover | **A** (unified memory) |
-| **AI workstation** | **RTX 5090 + RTX 6000 Pro, 1 TB DDR5** | Debian 12 | Heavy compute, quantization, fine-tuning | **A++** |
+| **AI workstation** | **RTX PRO 6000 Blackwell 96 GB + RTX 5090 32 GB, 1 TB DDR5** | Ubuntu 26.04 LTS | Heavy compute, quantization, fine-tuning | **A++** |
 | **DGX Spark ×2** *(→ ×4)* | NVIDIA GB10, 128 GB unified each, 200 Gbps network | DGX OS | Local LLM inference (vLLM) | **A+** |
 | **OrangePi 5 Plus** | RK3588, ARM64 | Linux | Always-on services, rack display | **C** |
 
@@ -51,12 +51,29 @@ fleet-wide — `192.168.4.x` and `192.168.7.x` are the same subnet.
 | Mac Pro | `Mac-Pro.local` | `macpro` | `csabakecskemeti` | ✅ |
 | Mac Pro (external) | `71.202.66.108:8822` | `macpro-wan` | `csabakecskemeti` | untested |
 | MacBook Pro | `MacBook-Pro-2.local` | `macbook` | `kecso` | n/a |
-| AI workstation | `workstation2deb12.local` | *(todo)* | `kecso` | powered off |
+| AI workstation | `AI-workstation.local` → **pinned to `192.168.7.117`** | `ws1` | `kecso` | ✅ |
 | DGX Spark 1 | `spark-7ceb.local` | `spark-7ceb` | `kecso` | ✅ |
 | DGX Spark 2 | `spark-db71.local` | `spark-db71` | `kecso` | ✅ |
 | OrangePi 5 Plus | `server-opi5p.local` | `opi` | `kecso` | ✅ |
 
-All use `~/.ssh/id_rsa` (RSA-4096). Verified 2026-08-09.
+Macs and the OrangePi use `~/.ssh/id_rsa` (RSA-4096); the Sparks and the AI
+workstation use `~/.ssh/id_ed25519`. Full 6×6 mesh verified 2026-08-10.
+
+> ⚠️ **The AI workstation is the one machine addressed by IP, not name.** It
+> holds `192.168.200.2` on the QSFP fabric, which **collides with spark-7ceb's
+> `enp1s0f1np1`**. mDNS on the Sparks therefore answers
+> `AI-workstation.local → 192.168.200.2`, and ARP hands the connection to
+> whichever machine replies first — so the name intermittently reaches
+> spark-7ceb instead. Pinning the LAN address in `fleet.json` sidesteps it.
+> Renumber one of the two fabric addresses and the name can be restored.
+
+**On letter case:** it does not matter for reaching a host — OpenSSH lowercases
+the target before resolving (`ssh -G AI-workstation.local` reports
+`hostname ai-workstation.local`) and `known_hosts` is written lowercased, so
+`.local` names are effectively case-insensitive. It *does* matter for `Host`
+**patterns** in `~/.ssh/config`, which match case-sensitively. Generated config
+therefore uses lowercase throughout; the true static hostname (`AI-workstation`)
+is recorded here in the inventory only.
 
 **Note on the DGX Sparks:** NVIDIA Sync maintains its own `ssh_config` (included
 at the top of `~/.ssh/config`) pinning `spark-db71.local` and several IPs to
@@ -94,14 +111,19 @@ version or serial in the name**.
 |---|---|---|---|
 | MacBook Pro | `MacBook-Pro-2.local` | `mbp1` | optional — cosmetic only |
 | Mac Pro | `Mac-Pro.local` | `macpro1` | optional — cosmetic only |
-| AI workstation | `workstation2deb12.local` | `ws1` | **yes — see below** |
+| AI workstation | `AI-workstation` | `ws1` | **done 2026-08-10** |
 | DGX Spark 1 | `spark-7ceb.local` | — | **no — vendor-managed** |
 | DGX Spark 2 | `spark-db71.local` | — | **no — vendor-managed** |
 | OrangePi 5 Plus | `server-opi5p.local` | `opi1` | optional — cosmetic only |
 
-Only one name has a real defect: `workstation2deb12` bakes in **Debian 12**, so
-it is wrong the moment that machine is upgraded. That is worth fixing; the rest
-is cosmetic.
+`workstation2deb12` had a real defect — it baked in **Debian 12**, and became
+wrong the moment that machine moved to Ubuntu 26.04. It was renamed to
+`AI-workstation` on 2026-08-10; the old name no longer resolves.
+
+The new name trades one flaw for a milder one: it encodes a **role**, which the
+rule above says to avoid, so it will read oddly if that box is ever repurposed.
+Not worth a second rename — but it is why the **alias** (`ws1`) is what the
+fleet's scripts and config use, never the hostname. The rest is cosmetic.
 
 The DGX Sparks **cannot** be usefully renamed — NVIDIA Sync's generated
 `ssh_config` pins `spark-db71.local` and several IPs, and renaming would break
@@ -169,11 +191,14 @@ power**.
 `bcfce7d9356d` · 27 repos — the largest checkout, all inference and
 fine-tuning work.
 
-RTX 5090 + RTX 6000 Pro with 1 TB DDR5. Handles quantization runs, fine-tuning,
-multi-GPU experiments, and anything that would take hours elsewhere. Target for
+**RTX PRO 6000 Blackwell Workstation Edition (96 GB) + RTX 5090 (32 GB), 1002 GB
+RAM**, Ubuntu 26.04 LTS. Handles quantization runs, fine-tuning, multi-GPU
+experiments, and anything that would take hours elsewhere. Target for
 `type: task` delegation addressed to `role:gpu` (UC-5).
 
-*Currently powered off — specs recorded as stated, not probed.*
+Specs probed 2026-08-10, not merely recorded. Joined the managed fleet the same
+day — it is the sixth machine and closes the last coverage gap. Steward claim
+delay 30 s, second in priority after the OrangePi.
 
 ### DGX Spark ×2 — local LLM inference · tier A+
 
@@ -221,11 +246,16 @@ provide no inference at all.
 
 ## Open items
 
-- [ ] Rename `workstation2deb12` → `ws1` (only hostname with a real defect —
-      it bakes in the OS version)
+- [ ] **Renumber the `192.168.200.2` collision** between the AI workstation's
+      `enp1s0f0np0` and spark-7ceb's `enp1s0f1np1`. Until then the workstation
+      must stay pinned to its LAN IP, and `ai-workstation.local` is unsafe to
+      use from either Spark
+- [ ] Give the workstation's `192.168.7.117` a DHCP reservation — it is pinned
+      by address, so a lease change silently breaks `ws1`
+- [x] ~~Rename `workstation2deb12`~~ — now `AI-workstation` (2026-08-10)
 - [ ] Decide hostnames **before** Tailscale enrolment, not after
-- [ ] Deploy to the AI workstation once powered on (`ws1` entry already exists)
-- [ ] Confirm workstation GPU/RAM by probe once powered on
+- [x] ~~Deploy to the AI workstation~~ — done 2026-08-10, fleet is 6/6
+- [x] ~~Confirm workstation GPU/RAM by probe~~ — done 2026-08-10
 - [ ] Register the workstation's `computers/<mac-id>.md` local paths after the
       next `/projectz scan` there
 - [ ] macOS 12.7.6 on the Mac Pro is EOL for security updates

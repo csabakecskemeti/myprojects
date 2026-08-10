@@ -1,6 +1,6 @@
 ---
 title: Fleet Management
-updated: 2026-08-09
+updated: 2026-08-10
 ---
 
 # Fleet Management
@@ -238,6 +238,49 @@ python3 fleet_known_hosts_clean.py     # keeps valid entries, backs up first
 ./fleet-bootstrap.sh
 ```
 
+### `REMOTE HOST IDENTIFICATION HAS CHANGED` — on a machine that was not rebuilt
+
+The alarming one, and here it was **not** an attack: the name was resolving to a
+**different machine**.
+
+The AI workstation holds `192.168.200.2` on the QSFP fabric, and so does
+spark-7ceb. mDNS on the Sparks answers `ai-workstation.local` with that fabric
+address rather than the LAN one, and ARP awards it to whichever host replies
+first — so `ssh ai-workstation.local` from spark-db71 reached **spark-7ceb**,
+presenting spark-7ceb's host key.
+
+What made it confusing is that the tools disagreed:
+
+```sh
+getent hosts ai-workstation.local     # 192.168.7.117   (correct)
+ssh-keyscan ai-workstation.local      # correct key
+avahi-resolve -n ai-workstation.local # 192.168.200.2   (the collision)
+ssh -v ai-workstation.local           # Connecting to ... [192.168.200.2]
+```
+
+`ssh -v` is the one that settles it — it prints the address actually dialled.
+Compare the fingerprint against every fleet host to identify the impostor:
+
+```sh
+for h in spark-7ceb.local spark-db71.local server-opi5p.local; do
+  printf '%-22s ' "$h"
+  ssh-keyscan -T 6 -t ed25519 "$h" 2>/dev/null | ssh-keygen -lf - | awk '{print $2}'
+done
+```
+
+**Do not just delete the known_hosts line** — that is the standard advice and
+here it would have papered over an IP conflict. Fix the address, or pin the
+machine to its LAN IP in `fleet.json` (which is what `ws1` does today).
+
+### Letter case in hostnames
+
+Case is **irrelevant for reaching a host**: OpenSSH lowercases the target before
+resolving, and writes `known_hosts` lowercased. `ssh -G AI-workstation.local`
+reports `hostname ai-workstation.local`, and mDNS is case-insensitive.
+
+Case **is** significant for `Host` **patterns** in `~/.ssh/config`. Keep
+everything generated in lowercase and the question never arises.
+
 ### A loop that only processes the first machine
 
 `ssh` inside a `while read` loop consumes the loop's stdin. Use `ssh -n`.
@@ -278,19 +321,24 @@ model.
 ## 6. Connectivity
 
 Full mesh — every machine reaches every other without a password or prompt.
-Verified 2026-08-09; regenerate with the matrix loop in `fleet-check.sh`'s
-sibling snippet or simply `./fleet-bootstrap.sh --check`.
+Verified 2026-08-10 across all six; regenerate with `./fleet-bootstrap.sh --check`.
 
-|            | macpro | macbook | opi | spark-7ceb | spark-db71 |
-|------------|--------|---------|-----|------------|------------|
-| **macbook**   | OK   | –       | OK  | OK         | OK         |
-| **macpro**    | OK   | OK      | OK  | OK         | OK         |
-| **opi**       | OK   | OK      | –   | OK         | OK         |
-| **spark-7ceb**| OK   | OK      | OK  | –          | OK         |
-| **spark-db71**| OK   | OK      | OK  | OK         | –          |
+|            | macpro | macbook | opi | spark-7ceb | spark-db71 | ws1 |
+|------------|--------|---------|-----|------------|------------|-----|
+| **macbook**   | OK   | –       | OK  | OK         | OK         | OK  |
+| **macpro**    | –    | OK      | OK  | OK         | OK         | OK  |
+| **opi**       | OK   | OK      | –   | OK         | OK         | OK  |
+| **spark-7ceb**| OK   | OK      | OK  | –          | OK         | OK  |
+| **spark-db71**| OK   | OK      | OK  | OK         | –          | OK  |
+| **ws1**       | OK   | OK      | OK  | OK         | OK         | –   |
 
 Each machine authenticates outbound with its **own** key: Macs and the
-OrangePi carry `id_rsa`, the Sparks carry `id_ed25519`.
+OrangePi carry `id_rsa`, the Sparks and the workstation carry `id_ed25519`.
+
+A machine is deliberately given **no alias pointing at itself** — so testing the
+mesh with a nested `ssh $a "ssh $b true"` makes the diagonal machine's whole row
+fail for a reason that has nothing to do with connectivity. Test the local
+machine's row directly, without the outer hop.
 
 Host keys were seeded with `ssh-keyscan` — trust-on-first-use over the LAN.
 Re-seed if a machine is rebuilt.
@@ -322,8 +370,9 @@ roadmap) that is where they belong. Regenerate rather than store.
 
 | Gap | Impact |
 |---|---|
-| AI workstation has none of this | powered off — 5 of 6 machines covered. Its `ws1` entry already exists, so it is one `./fleet-deploy.sh` away |
-| Prompt colour map is a hardcoded `case` | duplicated on every box; `prompt_color` already exists in `fleet.json` but nothing consumes it yet |
+| `ws1` is addressed by **IP**, not name | a DHCP lease change breaks it silently. Forced by the `192.168.200.2` collision; needs a reservation, or the fabric renumbered |
+| Prompt colour map is a hardcoded `case` | duplicated on every box; `prompt_color` already exists in `fleet.json` but nothing consumes it yet — adding `ws1` meant hand-editing the `case` again |
+| `fleet-aliases.sh` `ssh_*` list is hand-written | same: `ssh_ws1` had to be added by hand, though `fleet.json` already knows the machine |
 | `README.md` inventory is hand-written | should be generated from `fleet.json`; the two can drift |
 | `.bak.*` files accumulate | every install leaves timestamped backups on every machine |
 | No deployment record | the repo holds tooling, not a log of what was installed where and when |

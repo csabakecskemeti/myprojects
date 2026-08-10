@@ -13,6 +13,7 @@ alias ssh_macbook="ssh macbook"
 alias ssh_opi="ssh opi"
 alias ssh_spark1="ssh spark-7ceb"
 alias ssh_spark2="ssh spark-db71"
+alias ssh_ws1="ssh ws1"
 
 # --- local LLM cluster ------------------------------------------------------
 # Override per machine by exporting FLEET_LLM_HOST before this file is sourced.

@@ -22,7 +22,8 @@ __fleet_git_branch() {
 case "$(hostname -s 2>/dev/null)" in
   *MacBook*|*macbook*)   __FLEET_COLOR=6 ;;  # cyan    - travel
   *Mac-Pro*|*mac-pro*)   __FLEET_COLOR=2 ;;  # green   - desktop
-  workstation*)          __FLEET_COLOR=1 ;;  # red     - heavy compute
+  AI-workstation|ai-workstation|workstation*)
+                         __FLEET_COLOR=1 ;;  # red     - heavy compute
   spark-*)               __FLEET_COLOR=5 ;;  # magenta - inference cluster
   server-opi5p|opi*)     __FLEET_COLOR=3 ;;  # yellow  - always-on
   *)                     __FLEET_COLOR=4 ;;  # blue    - unknown

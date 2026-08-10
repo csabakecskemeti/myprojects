@@ -26,7 +26,8 @@ def load_fleet():
                  os.path.expanduser("~/.fleet.json")):
         if os.path.isfile(cand):
             data = json.load(open(cand))
-            return [(m["name"], m["host"], m["user"], m.get("port", 22))
+            return [(m["name"], m["host"], m["user"], m.get("port", 22),
+                     m.get("hostname", m["host"]))
                     for m in data["machines"] if m.get("managed", True)], cand
     raise SystemExit("error: fleet.json not found next to this script or at ~/.fleet.json")
 
@@ -50,8 +51,10 @@ me = socket.gethostname().split('.')[0].lower()
 def render():
     lines = [f"{BEGIN} -- generated, do not edit by hand",
              "# Source: myprojects/computers/fleet.json  ·  regenerate, never hand-patch."]
-    for name, host, user, port in FLEET:
-        if host.split('.')[0].lower() == me:
+    for name, host, user, port, hostname in FLEET:
+        # `host` may be a pinned IP (see ws1 in fleet.json), which can never
+        # match a hostname - so check the optional `hostname` field too.
+        if me in (host.split('.')[0].lower(), hostname.split('.')[0].lower()):
             continue
         lines += [f"\nHost {name}",
                   f"    HostName {host}",

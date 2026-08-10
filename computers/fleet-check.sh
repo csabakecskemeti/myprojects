@@ -6,10 +6,24 @@
 # others (currently only the MacBook reaches all; see the connectivity matrix
 # in computers/README.md).
 #
-# Usage:  ./fleet-check.sh [hosts...]      default: macpro opi spark-7ceb spark-db71
+# Usage:  ./fleet-check.sh [hosts...]      default: every managed machine
+#                                          except the one you are running on
+#
+# The default list comes from fleet.json, not a hardcoded string: a hardcoded
+# list silently omits new machines, which is exactly how ws1 stayed invisible
+# after it was added.
 
-HOSTS=${*:-"macpro opi spark-7ceb spark-db71"}
 REPO="$(cd "$(dirname "$0")" && pwd)"
+HOSTS=${*:-$(python3 -c '
+import json,sys,socket
+me = socket.gethostname().split(".")[0].lower()
+for m in json.load(open(sys.argv[1]))["machines"]:
+    if m.get("alias_only") or not m.get("managed", True): continue
+    names = {m["host"].split(".")[0].lower(),
+             m.get("hostname", m["host"]).split(".")[0].lower()}
+    if me in names: continue
+    print(m["name"])
+' "$REPO/fleet.json")}
 
 sum() { [ -f "$1" ] && (shasum -a 256 "$1" 2>/dev/null || sha256sum "$1") | cut -c1-8 || echo "-------"; }
 
