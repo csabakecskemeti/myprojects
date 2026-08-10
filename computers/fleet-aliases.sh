@@ -37,12 +37,10 @@ claude-local() {
   claude --model "$model" "$@"
 }
 
-# Consumed by skill-vault/plugins/local-llm/scripts/local-llm.sh.
+# Consumed by the local-llm skill-vault plugin.
 export LOCAL_LLM_URL="http://${FLEET_LLM_HOST}:4000"
 
-# STOPGAP: this plugin takes a pinned model name via env, so it cannot follow
-# the cluster. It was already stale once (Qwen3.6-35B-A3B-FP8, no longer
-# served). Resolving a model here would mean a curl on every shell start, which
-# is slow and fails when the cluster is off — so the fix belongs in the plugin:
-# it should call fleet_llm_model() at use time. Tracked in computers/README.md.
-export LOCAL_LLM_MODEL="deepseek-v4"
+# LOCAL_LLM_MODEL is deliberately NOT set. Pinning a model name means it goes
+# stale the moment the cluster loads something else - which already happened
+# once (Qwen3.6-35B-A3B-FP8). The plugin now resolves the served model at call
+# time via fleet_llm_model(). Export it only to force a specific model.

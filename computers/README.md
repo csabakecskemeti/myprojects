@@ -179,14 +179,19 @@ $ claude-local
 Using model: deepseek-ai/DeepSeek-V4-Flash
 ```
 
-> **`LOCAL_LLM_*` is a known stopgap.** The `local-llm` skill-vault plugin
-> (`plugins/local-llm/scripts/local-llm.sh`) reads `LOCAL_LLM_URL` and
-> `LOCAL_LLM_MODEL` from the environment, so the model is *pinned* and cannot
-> follow the cluster — it was already stale once
-> (`Qwen/Qwen3.6-35B-A3B-FP8`, no longer served). Resolving it at shell start
-> would mean a curl on every new shell: slow, and broken when the cluster is
-> off. The fix belongs in the plugin — it should call `fleet_llm_model` at use
-> time. Whether that plugin is still worth keeping is an open question.
+**`LOCAL_LLM_MODEL` is deliberately unset.** Pinning a model name means it
+goes stale the moment the cluster loads something else. The `local-llm`
+skill-vault plugin now resolves the served model at call time. Export it only
+to force a specific model.
+
+> **Config in three places is how this broke.** The plugin read
+> `LOCAL_LLM_URL` / `LOCAL_LLM_MODEL` from **`~/.zshenv`** — a third copy,
+> beyond `~/.zshrc` and `~/.fleet-aliases.sh` — still holding the old IP and
+> `Qwen/Qwen3.6-35B-A3B-FP8`. Because `~/.zshenv` is sourced by *every* zsh,
+> those stale values were in the environment of every shell and won over
+> anything set later. Every call requested a model the cluster no longer
+> served. `~/.zshenv` has been cleared and the plugin fixed
+> (`skill-vault@b8a602b`); it now prefers `~/.fleet-aliases.sh`.
 
 ---
 
@@ -282,9 +287,11 @@ provide no inference at all.
 - [ ] Register the workstation's `computers/<mac-id>.md` local paths after the
       next `/projectz scan` there
 - [ ] macOS 12.7.6 on the Mac Pro is EOL for security updates
-- [ ] `local-llm` skill-vault plugin should call `fleet_llm_model` at use time
-      instead of reading a pinned `LOCAL_LLM_MODEL` — or be retired if it no
-      longer earns its keep
+- [x] ~~`local-llm` skill-vault plugin should resolve the model at call time~~
+      — done, `skill-vault@b8a602b` (**not yet pushed**; it is a public
+      marketplace repo)
+- [ ] Decide whether the `local-llm` skill-vault plugin still earns its keep
+      now that `claude-local` covers the same cluster
 - [ ] Rename `workstation2deb12` → `ws1` (only hostname with a real defect)
 - [ ] Decide hostnames **before** Tailscale enrolment, not after
 - [ ] Deploy the shared shell environment to the workstation once powered on
