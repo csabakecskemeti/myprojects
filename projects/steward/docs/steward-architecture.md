@@ -312,9 +312,35 @@ tiers:
 health_check: GET {base_url}/models, 2s timeout
 ```
 
-This is exactly what `llm-router` and `llm-forwarder` (both backlog under
-`local-llm-self-sufficiency`) are for. The steward is their first real
-consumer, and the requirement is small enough to be worth building properly.
+This is exactly what the `llm-router` and `llm-forwarder` projects (both
+backlog under the `local-llm-self-sufficiency` goal) are for. The steward is
+their first real consumer, and the requirement is small enough to be worth
+building properly.
+
+### 6.3a Verified: the cluster can already do enrichment work
+
+Tested 2026-08-09 against `spark-db71` (vLLM, `DeepSeek-V4-Flash`) with a real
+Phase 1 triage prompt — classify a project's README into
+`STATUS` / `KIND` / `NEXT_ACTION`:
+
+```
+STATUS: backlog
+KIND: repo
+NEXT_ACTION: Write problem and solution sections.
+
+7.7s · prompt 157 tok · completion 277 tok
+```
+
+Correct, correctly formatted, at zero marginal cost. **The enrichment tier is
+not speculative — it works today.**
+
+> **Implementation note: the served model is a reasoning model.** It emits
+> `reasoning_content` before `content`, so a small `max_tokens` returns
+> `finish_reason: "length"` with **`content: null`** — looking like a failure
+> when it is really a truncated think phase. Budget ~1000+ completion tokens
+> for short structured answers, and always check `content` for null rather
+> than assuming a non-empty string. Any steward code calling a tier-A endpoint
+> must handle this.
 
 **Note:** LM Studio, Ollama, and `llama-server` are all llama.cpp underneath.
 They differ in packaging and in which endpoints they expose — which matters

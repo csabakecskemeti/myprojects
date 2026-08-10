@@ -70,14 +70,81 @@ call the ssh alias (`alias ssh_opi="ssh opi"`), so when an address changes only
 one line per machine needs editing. Before this rule, `.bash_profile` held a
 stale IP while `.zshrc` held the hostname — the drift this prevents.
 
-Tailscale (Phase 0) replaces this with one name that works on the LAN and
-while travelling, retiring the `macpro-wan` split.
+Tailscale (Phase 0 of the steward roadmap) replaces this with one name that
+works on the LAN and while travelling, retiring the `macpro-wan` split.
+
+### Hostname convention
+
+Three layers, each changing at a different rate. Keeping them separate is what
+makes the fleet manageable:
+
+| Layer | Encodes | Changes when |
+|---|---|---|
+| **Hostname** | stable hardware identity | the machine is replaced |
+| **SSH alias** | how you think about it day to day | rarely — this is the uniform layer |
+| **Role / tier** | what it is *for* | whenever priorities change |
+
+**Roles must never be encoded in hostnames.** Roles change; renaming a host is
+disruptive (known_hosts, mDNS caches, vendor config, scripts).
+
+Convention for names we control: `<class><ordinal>`, lowercase, **no OS,
+version or serial in the name**.
+
+| Machine | Current hostname | Convention | Rename? |
+|---|---|---|---|
+| MacBook Pro | `MacBook-Pro-2.local` | `mbp1` | optional — cosmetic only |
+| Mac Pro | `Mac-Pro.local` | `macpro1` | optional — cosmetic only |
+| AI workstation | `workstation2deb12.local` | `ws1` | **yes — see below** |
+| DGX Spark 1 | `spark-7ceb.local` | — | **no — vendor-managed** |
+| DGX Spark 2 | `spark-db71.local` | — | **no — vendor-managed** |
+| OrangePi 5 Plus | `server-opi5p.local` | `opi1` | optional — cosmetic only |
+
+Only one name has a real defect: `workstation2deb12` bakes in **Debian 12**, so
+it is wrong the moment that machine is upgraded. That is worth fixing; the rest
+is cosmetic.
+
+The DGX Sparks **cannot** be usefully renamed — NVIDIA Sync's generated
+`ssh_config` pins `spark-db71.local` and several IPs, and renaming would break
+vendor tooling silently. Since fleet-wide hostname uniformity is therefore
+unachievable, uniformity belongs in the **alias** layer, where it already
+exists. That is the argument for not renaming the rest.
+
+Decide before enrolling in Tailscale: MagicDNS uses the name registered at
+enrolment, so a rename afterwards means a second migration.
 
 ## Shared shell environment
 
-Applied fleet-wide, hooked into `~/.zshrc` and `~/.bashrc` between
-`# BEGIN fleet-prompt` / `# END fleet-prompt` markers so regeneration never
-clobbers hand-written config.
+Three managed files, **identical on every machine**. Shell rc files contain
+nothing but a single marker block that sources them:
+
+```sh
+# BEGIN fleet-managed -- generated, do not edit by hand
+# Source: myprojects/computers/  ·  regenerate, never hand-patch.
+[ -f ~/.fleet-prompt.sh ]  && . ~/.fleet-prompt.sh
+[ -f ~/.fleet-aliases.sh ] && . ~/.fleet-aliases.sh
+# END fleet-managed
+```
+
+| File | Contents | In repo |
+|---|---|---|
+| `~/.fleet-prompt.sh` | unified prompt, per-host colour, git branch | `computers/fleet-prompt.sh` |
+| `~/.fleet-aliases.sh` | ssh shortcuts, `claude-local`, `fleet_llm_model`, `LOCAL_LLM_*` | `computers/fleet-aliases.sh` |
+| `computers/fleet_rc_install.py` | strips hand-placed copies, installs the block | — |
+
+**Why the marker block matters.** Fleet config was first deployed by appending
+directly to rc files, which silently produced *two* `claude-local` definitions
+on the MacBook — one with a hardcoded IP, one parametrised. Because the second
+definition wins in shell, the stale one was invisible until read by eye. With
+one managed block and everything else in sourced files, the installer strips
+prior copies and the state is verifiable with a single grep:
+
+```sh
+grep -c 'BEGIN fleet-managed' ~/.zshrc ~/.bashrc ~/.bash_profile
+```
+
+`fleet_rc_install.py` is idempotent, backs up before writing, and removes
+hand-placed `claude-local`, `ssh_*` aliases, `LOCAL_LLM_*` exports and the
+older `fleet-prompt` block wherever it finds them.
 
 ### `~/.fleet-prompt.sh` — unified prompt
 
@@ -99,22 +166,27 @@ you are about to run a command on before you read the hostname.
 Branch detection uses `git symbolic-ref`, never `git status` — on large repos
 (`llama.cpp`, `executorch`) status would make every prompt slow.
 
-### `claude-local` — run Claude Code against the local cluster
+### `~/.fleet-aliases.sh` — shared shortcuts and helpers
 
-Auto-detects the served model from vLLM on `spark-db71` and points Claude Code
-at the LiteLLM proxy:
+- `ssh_macpro` · `ssh_macbook` · `ssh_opi` · `ssh_spark1` · `ssh_spark2` —
+  all call the ssh alias, never an address
+- `fleet_llm_model` — prints the model the cluster is currently serving
+- `claude-local` — runs Claude Code against that model via the LiteLLM proxy
+- `FLEET_LLM_HOST` — override the cluster host per machine before sourcing
 
 ```
-claude-local          # -> deepseek-ai/DeepSeek-V4-Flash
+$ claude-local
+Using model: deepseek-ai/DeepSeek-V4-Flash
 ```
 
-Defined on the Mac Pro and MacBook. Uses `spark-db71.local` rather than a
-hardcoded IP.
-
-> `LOCAL_LLM_URL` / `LOCAL_LLM_MODEL` on the Mac Pro are **not** dead
-> variables — `skill-vault/plugins/local-llm/scripts/local-llm.sh` reads both.
-> The model pin was stale (`Qwen/Qwen3.6-35B-A3B-FP8`, no longer served) and is
-> now `deepseek-v4`. It should really auto-detect the way `claude-local` does.
+> **`LOCAL_LLM_*` is a known stopgap.** The `local-llm` skill-vault plugin
+> (`plugins/local-llm/scripts/local-llm.sh`) reads `LOCAL_LLM_URL` and
+> `LOCAL_LLM_MODEL` from the environment, so the model is *pinned* and cannot
+> follow the cluster — it was already stale once
+> (`Qwen/Qwen3.6-35B-A3B-FP8`, no longer served). Resolving it at shell start
+> would mean a curl on every new shell: slow, and broken when the cluster is
+> off. The fix belongs in the plugin — it should call `fleet_llm_model` at use
+> time. Whether that plugin is still worth keeping is an open question.
 
 ---
 
@@ -210,7 +282,11 @@ provide no inference at all.
 - [ ] Register the workstation's `computers/<mac-id>.md` local paths after the
       next `/projectz scan` there
 - [ ] macOS 12.7.6 on the Mac Pro is EOL for security updates
-- [ ] `local-llm` plugin should auto-detect its model instead of pinning it
+- [ ] `local-llm` skill-vault plugin should call `fleet_llm_model` at use time
+      instead of reading a pinned `LOCAL_LLM_MODEL` — or be retired if it no
+      longer earns its keep
+- [ ] Rename `workstation2deb12` → `ws1` (only hostname with a real defect)
+- [ ] Decide hostnames **before** Tailscale enrolment, not after
 - [ ] Deploy the shared shell environment to the workstation once powered on
 - [ ] Generate all of this from a declarative inventory — see
       [ideas/fleetz.md](../ideas/fleetz.md)

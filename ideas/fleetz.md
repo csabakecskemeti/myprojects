@@ -38,11 +38,23 @@ computers/fleet.yaml   ← the only thing edited by hand
         └──▶ computers/README.md     (generated inventory table)
 ```
 
-**Three of these five outputs already exist by hand** (2026-08-09): the ssh
-config blocks, `~/.fleet-prompt.sh`, and `claude-local` were deployed manually
-across five machines. That is the proof the generator is worth writing — the
-manual version took a dozen ssh round-trips and produced one wrong hostname
-(`Csabas-MacBook-Pro.local` instead of the canonical `MacBook-Pro-2.local`).
+**Most of these outputs already exist by hand** (2026-08-09): the ssh config
+blocks, `~/.fleet-prompt.sh`, `~/.fleet-aliases.sh` and the `# BEGIN
+fleet-managed` rc block were deployed across five machines, with
+`computers/fleet_rc_install.py` doing the strip-and-install.
+
+That manual round is the proof the generator is worth writing. It produced two
+real defects:
+
+1. A **duplicate `claude-local`** on the MacBook — appended without checking,
+   because the check command timed out. The later definition wins in shell, so
+   the stale hardcoded-IP copy was invisible until read by eye.
+2. A **wrong hostname** (`Csabas-MacBook-Pro.local` rather than the canonical
+   `MacBook-Pro-2.local`) written into the Mac Pro's ssh config.
+
+Both are exactly the class of error a declarative generator removes: it is not
+about saving keystrokes, it is that hand-editing N machines has no way to
+verify the result.
 
 ## Problem It Solves
 
@@ -129,8 +141,11 @@ private for the source, public for the generated summary.**
 - The prompt's **per-host colour** is derived data: it should come from the
   machine's `roles`/`tier` in `fleet.yaml`, not a hand-maintained `case`
   statement duplicated on every box (which is what exists today)
-- Shell rc hooks already use `# BEGIN fleet-prompt` markers — the same
-  convention the generator needs, so the migration path is clean
+- Shell rc files already carry a single `# BEGIN fleet-managed` block sourcing
+  managed files — the convention the generator needs, so the migration path is
+  clean. `fleet_rc_install.py` is effectively `fleetz apply` in embryo
+- Verification matters as much as generation. `grep -c 'BEGIN fleet-managed'`
+  across rc files is how the duplicate above would have been caught
 - Tailscale (Phase 0) changes every address at once. That migration is the
   strongest argument for generating rather than hand-editing: one file edit
   instead of 5 machines × 3 files
