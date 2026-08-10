@@ -73,6 +73,18 @@ Ensure all development machines have identical configurations, tools, and settin
 - Could use skill-vault pattern for dotfiles too
 - Git submodules or separate repos per config type?
 - Need to handle machine-specific configs (paths, hardware)
+- **[fleetz](../ideas/fleetz.md)** — generate ssh config, aliases and the
+  shared prompt from one declarative inventory. Directly answers the
+  "machine-specific configs" question above via `roles`/`tier` fields.
+
+## Progress Notes
+
+- 2026-08-09: First concrete progress. Deployed by hand across five machines:
+  ssh host aliases (`macpro`, `opi`, `spark-7ceb`, `spark-db71`, `macbook`),
+  passwordless auth fleet-wide on one key, `~/.fleet-prompt.sh` (unified
+  prompt with per-host colour and git branch), and `claude-local` on both Macs.
+  Addresses now live in `~/.ssh/config`, not shell aliases — see
+  [computers/README.md](../computers/README.md).
 
 ## Progress Notes
 
