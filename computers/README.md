@@ -132,6 +132,7 @@ nothing but a single marker block that sources them:
 | `computers/fleet_rc_install.py` | strips hand-placed copies, installs the rc block | — |
 | `computers/fleet_ssh_install.py` | strips hand-written Host blocks, installs the ssh block | — |
 | `computers/fleet-check.sh` | verifies deployment and detects drift | — |
+| `computers/fleet_known_hosts_clean.py` | strips malformed `known_hosts` lines | — |
 
 **Why the marker block matters.** Fleet config was first deployed by appending
 directly to rc files, which silently produced *two* `claude-local` definitions
@@ -274,6 +275,21 @@ replacing those — never editing anything inside an rc file.
 
 Drift detection matters more than generation. Hand-deployment can never answer
 "is the fleet in the state I think it is" — this can, in one command.
+
+### Deliberately not in this repo
+
+The fleet's **data** is excluded even though the tooling is committed:
+
+| Artefact | Why not here |
+|---|---|
+| collected public keys | identifies every machine and account in one file |
+| collected host keys | same, plus it is regenerable with `ssh-keyscan` |
+
+Public keys are not secrets, but they are exactly the "mildly sensitive
+inventory" case from [the `fleetz` idea](../ideas/fleetz.md): the generator is
+publishable, the fleet data is not. Once `myprojects-private` exists (Phase 2
+of the steward roadmap), that is where they belong. Regenerate both from the
+live fleet rather than storing them here.
 
 ### Known gaps
 
