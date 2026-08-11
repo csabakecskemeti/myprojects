@@ -4,7 +4,7 @@ status: active
 role: owner
 repo:
 has_git: false
-tags: [career, interview, coinbase, python, system-design]
+tags: [career, interview, coinbase, python, system-design, tooling]
 created: 2026-08-10
 updated: 2026-08-10
 parents: []
@@ -29,15 +29,17 @@ goals:
 
 ## Material Location
 
-`~/Documents/workspace/interviews/coinbase/`
+`~/Documents/workspace/interviews/`
 
-| File | What |
+| Path | What |
 |---|---|
-| `README.md` | Index + at-a-glance |
-| `recruiter-call-recap.md` | Full recruiter call recap (2026-08-10) |
-| `prep-plan.md` | 6-block, ~14-hour prep plan |
-| `coding-drills.md` | 3 escalating-build coding drills |
-| `transcript/` | Raw + annotated transcripts |
+| `pyprep/` | The practice app — `python3 -m pyprep.server`, or `/pyprep-coach` |
+| `coinbase/README.md` | Index + at-a-glance |
+| `coinbase/recruiter-call-recap.md` | Full recruiter call recap (2026-08-10) |
+| `coinbase/hints-and-signals.md` | Repetition analysis + her literal homework list |
+| `coinbase/prep-plan.md` | 6-block, ~14-hour prep plan |
+| `coinbase/curriculum/` | 50 validated practice tasks |
+| `coinbase/transcript/` | Corrected + raw transcripts |
 
 ## Goals
 
