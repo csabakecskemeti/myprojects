@@ -41,6 +41,8 @@ domain framing, and grading rubric.
       exercise must have a reference solution that passes and a starter that fails.
       Capped (4/topic, 2 for syntax topics, 40 total) so one topic can't swallow the session
 - [x] Progress persists across restarts; reset by day / all / mastery
+- [x] Re-run solved tasks to refine them (unscored, keeps the better version);
+      task picker to revisit anything; Pause button that doesn't corrupt timings
 - [x] `/pyprep-coach` Claude Code skill
 - [ ] Availability sent to recruiter
 - [ ] Non-AI CodeSignal practice assessment completed
