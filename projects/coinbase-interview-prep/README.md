@@ -30,7 +30,12 @@ domain framing, and grading rubric.
 - [x] Hint/repetition analysis — idempotency is the one term she used in both of her lists
 - [x] Prep plan written (6 blocks)
 - [x] **pyprep app built** — local practice app, zero deps, records editing process
-- [x] **50-task curriculum written and validated** (28 reference solutions pass, 413 assertions)
+- [x] **120-task curriculum written and validated** (50 reference solutions pass, 534 assertions)
+- [x] Stage 0 exploded to **one function per task** (87 tasks) so a stall names one idea
+- [x] **Proactive in-app coaching** — fires on a 45s stall or 3 failed runs: code smells,
+      recall cards, and a local-LLM read of the buffer (auto-detects Ollama/LM Studio;
+      prefers a code-tuned model)
+- [x] 3-rung hint ladders on every task; visible test cases
 - [x] `/pyprep-coach` Claude Code skill
 - [ ] Availability sent to recruiter
 - [ ] Non-AI CodeSignal practice assessment completed
