@@ -45,7 +45,9 @@ domain framing, and grading rubric.
       simulation) + 10 LeetCode-easy classics in LeetCode's own format — 152 tasks total
 - [x] **Areas** you can jump between, independent of stage gating
 - [x] INPUT/OUTPUT examples derived from the tests via `ast`
-- [x] Free-form exercise requests to the local model
+- [x] Free-form exercise requests to the local model ("New exercise" button)
+- [x] **Ask** — per-exercise chat with the local model, history kept until the
+      exercise changes; refuses to hand over solutions
 - [x] Re-run solved tasks to refine them (unscored, keeps the better version);
       task picker to revisit anything; Pause button that doesn't corrupt timings
 - [x] `/pyprep-coach` Claude Code skill
