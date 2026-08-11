@@ -36,6 +36,11 @@ domain framing, and grading rubric.
       recall cards, and a local-LLM read of the buffer (auto-detects Ollama/LM Studio;
       prefers a code-tuned model)
 - [x] 3-rung hint ladders on every task; visible test cases
+- [x] **Help button** — local model gives one next step from your code + the error
+- [x] **Validated task generation** — weak topics top themselves up; every generated
+      exercise must have a reference solution that passes and a starter that fails.
+      Capped (4/topic, 2 for syntax topics, 40 total) so one topic can't swallow the session
+- [x] Progress persists across restarts; reset by day / all / mastery
 - [x] `/pyprep-coach` Claude Code skill
 - [ ] Availability sent to recruiter
 - [ ] Non-AI CodeSignal practice assessment completed
