@@ -74,8 +74,30 @@ created pointing at `ollama-tunnel1`. Always:
 cloudflared --config /dev/null tunnel route dns --overwrite-dns <TUNNEL-UUID> <hostname>
 ```
 
-**Cloudflare times out at 100s without a first byte** — long *non-streaming* generations
-return 524. Streaming clients (Claude Code included) are fine.
+**Cloudflare returns 524 if the origin sends no complete response in ~120s** (the limit on
+this zone; it is not configurable below Enterprise). Measured 2026-09-04 through the tunnel:
+
+| Request | Time to first byte | Verdict |
+|---|---|---|
+| streaming, small prompt | 0.31s | safe |
+| streaming, 100 KB prompt | 3.3s | safe - prefill is not the problem |
+| **non-streaming, long generation** | **61s (nothing until the end)** | **524 once it passes ~120s** |
+
+So the clock is satisfied by the *first byte*, not by finishing. Anything that streams is
+effectively immune; anything that buffers is on a 120s budget.
+
+**Mitigations, in order of effort:**
+
+1. **Stream everything.** The cheapest fix and it covers the common case.
+2. **Do not queue behind other requests.** vLLM runs `max-num-seqs 4` and LiteLLM has
+   `max_queue_size: 20`. A queued request sends *no bytes while it waits*, so time in
+   queue counts against the 120s. Concurrent agents are a likely 524 cause even when
+   every individual request is fast. Keep to ~1 autonomous worker.
+3. **Use the LAN when home** — `fleet_use_lan`, or just let `fleet_llm_base` probe. No
+   Cloudflare in the path, no 524.
+4. **Bypass the HTTP proxy entirely** for the travelling case: Tailscale (already Phase 0
+   of the steward roadmap) or a `cloudflared access tcp` sidecar. Either turns this into a
+   raw connection with no HTTP timeout. This is the only real fix for long buffered calls.
 
 ## Other tunnels on this account
 

@@ -100,9 +100,12 @@ did exactly this and reported a live proxy as down — fixed to accept 200/401/4
 LiteLLM rejects it before the auth layer. Health checks and error messages should treat
 400 as "bad key" too.
 
-## Cloudflare 524s at 100s to first byte
+## Cloudflare 524s at ~120s
 
-Non-streaming long generations fail. Stream.
+Measured: streaming first-byte is 0.3s even with a 100 KB prompt, so streaming is safe.
+Non-streaming buffers everything to the end and dies past ~120s. Time spent *queued*
+behind other requests counts too - concurrent agents on a 4-stream device cause this even
+when each request is individually fast. See ai-infra/remote-access.md for mitigations.
 
 ## Start buttons always reload the model
 
