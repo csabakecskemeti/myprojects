@@ -36,7 +36,7 @@ Create a seamless development experience across all personal machines where swit
 - [ ] All machines have identical dev environment (dotfiles, tools, configs)
 - [ ] Switching machines requires zero manual sync
 - [ ] Can access any machine remotely from any other
-- [ ] Can access DGX Spark cluster from any machine
+- [x] Can access DGX Spark cluster from any machine (spark.devquasar.com, 2026-09-03)
 - [ ] Claude Code agents can message each other across machines
 - [ ] Project state (tasks, notes, progress) syncs automatically
 

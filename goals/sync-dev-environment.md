@@ -44,7 +44,7 @@ Ensure all development machines have identical configurations, tools, and settin
 ### Project State
 - [ ] Projectz tracker repo synced
 - [ ] Common repos cloned to same paths
-- [ ] Environment variables for projects
+- [x] Environment variables for projects (~/.fleet-secrets.sh via computers/fleet-push.sh)
 
 ## Approach Options
 

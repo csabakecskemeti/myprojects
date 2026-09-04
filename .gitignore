@@ -1,0 +1,8 @@
+# Secrets must never enter this repo. The fleet secret file is distributed
+# machine-to-machine over scp, never through git.
+.fleet-secrets.sh
+*fleet-secrets*
+.env
+*.key
+*.pem
+secrets/

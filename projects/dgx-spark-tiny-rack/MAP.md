@@ -1,12 +1,12 @@
 ---
 slug: dgx-spark-tiny-rack
-status: backlog
+status: active
 role: owner
 repo: https://github.com/csabakecskemeti/dgx-spark-tiny-rack
 has_git: true
 tags: [dgx, spark, rack]
 created: 2026-06-10
-updated: 2026-06-10
+updated: 2026-09-03
 last_commit: 2026-04-17
 my_commits: 5
 total_commits: 5
