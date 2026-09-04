@@ -18,6 +18,7 @@ share*; this one is *the inference infrastructure they all point at*.
 | [auth-and-secrets.md](./auth-and-secrets.md) | Master key, distribution, rotation |
 | [spark-monitor.md](./spark-monitor.md) | The OrangePi rack dashboard and its buttons |
 | [runbook.md](./runbook.md) | Day-to-day commands, and the footguns |
+| [spark-request-path.html](./spark-request-path.html) | Drawn version of the flow below - open in a browser |
 
 ## The whole thing at a glance
 

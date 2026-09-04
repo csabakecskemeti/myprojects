@@ -1,0 +1,470 @@
+<title>Spark Request Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+  :root {
+    --bg:        #f7f8fa;
+    --surface:   #ffffff;
+    --surface-2: #eef0f4;
+    --ink:       #15181f;
+    --ink-soft:  #545c6b;
+    --line:      #ccd2dd;
+    --public:    #b4530f;
+    --lan:       #0c6f61;
+    --boundary:  #b0201c;
+    --shadow:    0 1px 2px rgba(21,24,31,.06), 0 8px 24px rgba(21,24,31,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:        #0f1116;
+      --surface:   #171a21;
+      --surface-2: #1e222b;
+      --ink:       #e6e9ef;
+      --ink-soft:  #98a1b2;
+      --line:      #333a47;
+      --public:    #eda145;
+      --lan:       #45c9b4;
+      --boundary:  #ef7a76;
+      --shadow:    0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:        #0f1116;
+    --surface:   #171a21;
+    --surface-2: #1e222b;
+    --ink:       #e6e9ef;
+    --ink-soft:  #98a1b2;
+    --line:      #333a47;
+    --public:    #eda145;
+    --lan:       #45c9b4;
+    --boundary:  #ef7a76;
+    --shadow:    0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .wrap { max-width: 62rem; margin: 0 auto; display: flex; flex-direction: column; gap: 3.25rem; }
+  .prose { max-width: 34rem; }
+
+  h1, h2, h3, .eyebrow, th, .mono, figcaption {
+    font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .eyebrow {
+    font-size: .72rem; font-weight: 600; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--ink-soft); margin: 0 0 .85rem;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 5vw, 3.1rem); font-weight: 700; line-height: 1.04;
+    letter-spacing: -.022em; margin: 0 0 1rem; text-wrap: balance;
+  }
+  h2 {
+    font-size: 1.32rem; font-weight: 600; letter-spacing: -.01em;
+    margin: 0 0 .9rem; text-wrap: balance;
+  }
+  .lede { font-size: 1.14rem; color: var(--ink-soft); margin: 0; max-width: 34rem; }
+  p { margin: 0 0 1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  .mono, code {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .87em;
+  }
+  code {
+    background: var(--surface-2); padding: .1em .38em;
+    border-radius: 3px; color: var(--ink);
+  }
+
+  header { border-bottom: 1px solid var(--line); padding-bottom: 2.25rem; }
+
+  figure {
+    margin: 0; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 6px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .figbody { padding: 1.75rem 1.5rem 1.25rem; overflow-x: auto; }
+  figure svg { display: block; width: 100%; min-width: 640px; height: auto; }
+  figcaption {
+    font-size: .82rem; color: var(--ink-soft); line-height: 1.5;
+    padding: .95rem 1.5rem 1.1rem; border-top: 1px solid var(--line);
+    background: var(--surface-2);
+  }
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { text-align: left; padding: .62rem .85rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-size: .7rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--ink-soft); border-bottom-width: 1.5px;
+  }
+  td:first-child { white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  .notes { display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+  .note {
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 3px solid var(--accent, var(--line));
+    border-radius: 5px; padding: 1.05rem 1.15rem;
+  }
+  .note.pub { --accent: var(--public); }
+  .note.lan { --accent: var(--lan); }
+  .note.bnd { --accent: var(--boundary); }
+  .note h3 {
+    font-size: .74rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    margin: 0 0 .5rem; color: var(--ink-soft);
+  }
+  .note p { font-size: .95rem; margin: 0; }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">DGX Spark cluster &middot; devquasar</p>
+    <h1>Spark Request Path</h1>
+    <p class="lede">
+      Two ways in, one place where the key is checked, and one hop that runs on a clock.
+    </p>
+  </header>
+
+  <figure>
+    <div class="figbody">
+      <svg viewBox="0 0 900 620" role="img"
+           aria-label="Request flow. The cloudflared connector on the OrangePi dials outward to Cloudflare and holds four QUIC connections open; requests then travel back down those already-open connections, so nothing listens for inbound traffic at home. Clients on the LAN instead reach spark-db71.local port 4000 directly. Both paths cross one auth boundary into LiteLLM, which runs on the head node alongside vLLM; vLLM shards tensor-parallel onto the worker node spark-7ceb.">
+        <defs>
+          <marker id="ah-pub" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="var(--public)"/>
+          </marker>
+          <marker id="ah-lan" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="var(--lan)"/>
+          </marker>
+          <marker id="ah-ink" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+          </marker>
+          <marker id="ah-dial" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="var(--ink-soft)"/>
+          </marker>
+        </defs>
+
+        <g font-family="Archivo, Arial, sans-serif">
+
+          <text x="165" y="18" text-anchor="middle" font-size="11" font-weight="600"
+                letter-spacing="1.4" fill="var(--lan)">ON THE LAN</text>
+          <text x="700" y="18" text-anchor="middle" font-size="11" font-weight="600"
+                letter-spacing="1.4" fill="var(--public)">FROM ANYWHERE</text>
+
+          <!-- clients -->
+          <rect x="60" y="32" width="210" height="52" rx="4"
+                fill="var(--surface-2)" stroke="var(--lan)" stroke-width="1.5"/>
+          <text x="165" y="56" text-anchor="middle" font-size="13" font-weight="600"
+                fill="currentColor">Claude Code</text>
+          <text x="165" y="73" text-anchor="middle" font-size="11" fill="var(--ink-soft)">
+            on the home network
+          </text>
+
+          <rect x="595" y="32" width="210" height="52" rx="4"
+                fill="var(--surface-2)" stroke="var(--public)" stroke-width="1.5"/>
+          <text x="700" y="56" text-anchor="middle" font-size="13" font-weight="600"
+                fill="currentColor">Claude Code</text>
+          <text x="700" y="73" text-anchor="middle" font-size="11" fill="var(--ink-soft)">
+            travelling, or behind a corp VPN
+          </text>
+
+          <!-- client -> edge -->
+          <line x1="700" y1="84" x2="700" y2="128" stroke="var(--public)"
+                stroke-width="2" marker-end="url(#ah-pub)"/>
+          <text x="712" y="110" font-size="11" fill="var(--ink-soft)">HTTPS 443</text>
+
+          <rect x="595" y="130" width="210" height="52" rx="4"
+                fill="var(--surface)" stroke="var(--public)" stroke-width="1.5"/>
+          <text x="700" y="154" text-anchor="middle" font-size="13" font-weight="600"
+                fill="currentColor">Cloudflare edge</text>
+          <text x="700" y="171" text-anchor="middle" font-size="10.5"
+                font-family="IBM Plex Mono, monospace" fill="var(--ink-soft)">
+            spark.devquasar.com
+          </text>
+
+          <line x1="820" y1="156" x2="856" y2="156" stroke="var(--public)"
+                stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="860" y="148" font-size="10" font-weight="600" fill="var(--public)">120s</text>
+          <text x="860" y="161" font-size="10" fill="var(--ink-soft)">clock</text>
+
+          <!-- the two directions between edge and connector -->
+          <line x1="668" y1="182" x2="668" y2="228" stroke="var(--public)"
+                stroke-width="2" marker-end="url(#ah-pub)"/>
+          <line x1="742" y1="228" x2="742" y2="182" stroke="var(--ink-soft)"
+                stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ah-dial)"/>
+          <text x="470" y="199" text-anchor="end" font-size="11" fill="var(--ink-soft)">
+            requests travel down
+          </text>
+          <text x="470" y="213" text-anchor="end" font-size="11" fill="var(--ink-soft)">
+            an already-open connection
+          </text>
+          <text x="756" y="199" font-size="10.5" fill="var(--ink-soft)">connector</text>
+          <text x="756" y="212" font-size="10.5" fill="var(--ink-soft)">dials out first</text>
+
+          <rect x="595" y="230" width="210" height="62" rx="4"
+                fill="var(--surface)" stroke="var(--public)" stroke-width="1.5"/>
+          <text x="700" y="252" text-anchor="middle" font-size="13" font-weight="600"
+                fill="currentColor">cloudflared</text>
+          <text x="700" y="268" text-anchor="middle" font-size="10.5"
+                font-family="IBM Plex Mono, monospace" fill="var(--ink-soft)">
+            server-opi5p &middot; 192.168.7.100
+          </text>
+          <text x="700" y="284" text-anchor="middle" font-size="10" fill="var(--ink-soft)">
+            no inbound port &middot; the kill switch
+          </text>
+
+          <!-- converge -->
+          <path d="M700,292 V330 H470 V362" fill="none" stroke="var(--public)"
+                stroke-width="2" marker-end="url(#ah-pub)"/>
+          <path d="M165,84 V318 H410 V362" fill="none" stroke="var(--lan)"
+                stroke-width="2" marker-end="url(#ah-lan)"/>
+          <text x="176" y="188" font-size="11" fill="var(--ink-soft)">no Cloudflare,</text>
+          <text x="176" y="202" font-size="11" fill="var(--ink-soft)">no tunnel</text>
+          <text x="176" y="223" font-size="10.5" font-family="IBM Plex Mono, monospace"
+                fill="var(--ink-soft)">spark-db71.local:4000</text>
+          <text x="484" y="322" font-size="10.5" font-family="IBM Plex Mono, monospace"
+                fill="var(--ink-soft)">192.168.7.103:4000</text>
+          <text x="484" y="335" font-size="10" fill="var(--ink-soft)">(IP: cloudflared can't do mDNS)</text>
+
+          <!-- auth boundary -->
+          <line x1="40" y1="348" x2="860" y2="348" stroke="var(--boundary)"
+                stroke-width="1.5" stroke-dasharray="7 5"/>
+          <text x="40" y="342" font-size="11" font-weight="600" letter-spacing=".7"
+                fill="var(--boundary)">AUTH BOUNDARY &mdash; Authorization: Bearer $SPARK_API_KEY</text>
+
+          <!-- head node container -->
+          <rect x="230" y="362" width="420" height="206" rx="6"
+                fill="none" stroke="currentColor" stroke-width="1.25"
+                stroke-dasharray="4 4" opacity=".55"/>
+          <text x="246" y="381" font-size="11" font-weight="600" letter-spacing=".6"
+                fill="var(--ink-soft)">spark-db71 &middot; HEAD NODE &middot; 128 GB</text>
+
+          <rect x="258" y="392" width="364" height="62" rx="5"
+                fill="var(--surface-2)" stroke="currentColor" stroke-width="1.75"/>
+          <text x="440" y="416" text-anchor="middle" font-size="14" font-weight="700"
+                fill="currentColor">LiteLLM proxy</text>
+          <text x="440" y="433" text-anchor="middle" font-size="10.5"
+                font-family="IBM Plex Mono, monospace" fill="var(--ink-soft)">:4000</text>
+          <text x="440" y="447" text-anchor="middle" font-size="10" fill="var(--ink-soft)">
+            the only thing that checks the key
+          </text>
+
+          <line x1="440" y1="454" x2="440" y2="486" stroke="currentColor"
+                stroke-width="2" marker-end="url(#ah-ink)"/>
+          <text x="452" y="475" font-size="10.5" fill="var(--ink-soft)">localhost</text>
+
+          <rect x="258" y="488" width="364" height="58" rx="5"
+                fill="var(--surface)" stroke="currentColor" stroke-width="1.75"/>
+          <text x="440" y="511" text-anchor="middle" font-size="14" font-weight="700"
+                fill="currentColor">vLLM</text>
+          <text x="440" y="527" text-anchor="middle" font-size="10.5"
+                font-family="IBM Plex Mono, monospace" fill="var(--ink-soft)">:8000</text>
+          <text x="440" y="539" text-anchor="middle" font-size="10" fill="var(--boundary)">
+            no auth &mdash; bound to this box
+          </text>
+
+          <!-- worker -->
+          <path d="M622,517 H700" fill="none" stroke="currentColor"
+                stroke-width="1.5" marker-end="url(#ah-ink)"/>
+          <text x="661" y="509" text-anchor="middle" font-size="10" fill="var(--ink-soft)">shard</text>
+
+          <rect x="702" y="492" width="158" height="52" rx="4"
+                fill="var(--surface-2)" stroke="var(--line)" stroke-width="1.25"/>
+          <text x="781" y="512" text-anchor="middle" font-size="12" font-weight="600"
+                fill="currentColor">spark-7ceb</text>
+          <text x="781" y="528" text-anchor="middle" font-size="10" fill="var(--ink-soft)">
+            worker &middot; 128 GB
+          </text>
+          <text x="781" y="560" text-anchor="middle" font-size="10"
+                font-family="IBM Plex Mono, monospace" fill="var(--ink-soft)">
+            192.168.200.0/24
+          </text>
+          <text x="781" y="573" text-anchor="middle" font-size="10" fill="var(--ink-soft)">
+            tensor-parallel link
+          </text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>
+      The connector <b>dials outward</b> (dashed) and holds four QUIC connections open;
+      requests then travel back down them, so nothing at home listens for inbound traffic.
+      Both entry paths converge on <b>one</b> auth boundary &mdash; the LAN path skips
+      Cloudflare, but not the key. LiteLLM and vLLM both run on the head node; only the
+      tensor-parallel shard crosses to the worker.
+    </figcaption>
+  </figure>
+
+  <section class="prose">
+    <h2>Reading it in one pass</h2>
+    <p>
+      The connector on the OrangePi dials <em>out</em> to Cloudflare and keeps four QUIC
+      connections open. A request from anywhere lands on the edge and is pushed back down one
+      of those, so no port is opened at home and no firewall rule exists. The OrangePi then
+      makes an ordinary LAN call to the head node &mdash; it hosts nothing itself, and
+      LiteLLM sees every remote caller as <span class="mono">192.168.7.100</span>.
+    </p>
+    <p>
+      A request from the house skips the top two boxes and goes straight to
+      <code>spark-db71.local:4000</code> by name. Same destination, same key required, no
+      external dependency. Only the connector needs the literal IP, because cloudflared
+      cannot resolve mDNS. <code>fleet_llm_base</code> picks between the two automatically by
+      probing the LAN with a one-second timeout.
+    </p>
+  </section>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>Hop</th><th>Where it runs</th><th>Auth</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">spark.devquasar.com</td>
+          <td>Cloudflare edge</td>
+          <td>passes through</td>
+          <td>Only hop with a timeout. Terminates TLS.</td>
+        </tr>
+        <tr>
+          <td class="mono">cloudflared</td>
+          <td>server-opi5p</td>
+          <td>passes through</td>
+          <td>Outbound-only. Power it off and the public endpoint dies.</td>
+        </tr>
+        <tr>
+          <td class="mono">:4000</td>
+          <td>spark-db71</td>
+          <td><b>key checked</b></td>
+          <td>LiteLLM. OpenAI- and Anthropic-compatible.</td>
+        </tr>
+        <tr>
+          <td class="mono">:8000</td>
+          <td>spark-db71</td>
+          <td>none</td>
+          <td>vLLM. Bound to the box; exposing it bypasses all auth.</td>
+        </tr>
+        <tr>
+          <td class="mono">200 GbE link</td>
+          <td>both Sparks</td>
+          <td>&mdash;</td>
+          <td>Tensor-parallel over <span class="mono">192.168.200.0/24</span>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <figure>
+    <div class="figbody">
+      <svg viewBox="0 0 880 250" role="img"
+           aria-label="Timeline comparing three request types against the 120-second Cloudflare cutoff. A streaming request with a small prompt is silent for 0.31 seconds then streams. A streaming request with a 100 kilobyte prompt is silent for 3.3 seconds then streams. A non-streaming request is silent for 61 seconds and delivers everything at the end, so a longer one crosses the cutoff and is killed.">
+        <g font-family="Archivo, Arial, sans-serif">
+
+          <!-- axis -->
+          <line x1="150" y1="205" x2="828" y2="205" stroke="currentColor"
+                stroke-width="1" opacity=".35"/>
+          <text x="150" y="224" font-size="10" fill="var(--ink-soft)" text-anchor="middle">0s</text>
+          <text x="376" y="224" font-size="10" fill="var(--ink-soft)" text-anchor="middle">60s</text>
+          <text x="603" y="224" font-size="10" fill="var(--ink-soft)" text-anchor="middle">120s</text>
+          <text x="828" y="224" font-size="10" fill="var(--ink-soft)" text-anchor="middle">180s</text>
+
+          <!-- cutoff -->
+          <line x1="603" y1="24" x2="603" y2="205" stroke="var(--boundary)"
+                stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text x="609" y="36" font-size="11" font-weight="600" fill="var(--boundary)">
+            Cloudflare cuts here
+          </text>
+
+          <!-- row 1 -->
+          <text x="138" y="66" text-anchor="end" font-size="11.5" font-weight="600"
+                fill="currentColor">streaming</text>
+          <text x="138" y="80" text-anchor="end" font-size="10" fill="var(--ink-soft)">small prompt</text>
+          <rect x="150" y="52" width="2" height="24" fill="var(--boundary)"/>
+          <rect x="152" y="52" width="150" height="24" rx="2" fill="var(--lan)" opacity=".7"/>
+          <text x="312" y="69" font-size="10.5" fill="var(--ink-soft)" class="num">
+            first byte 0.31s &mdash; safe
+          </text>
+
+          <!-- row 2 -->
+          <text x="138" y="120" text-anchor="end" font-size="11.5" font-weight="600"
+                fill="currentColor">streaming</text>
+          <text x="138" y="134" text-anchor="end" font-size="10" fill="var(--ink-soft)">100 KB prompt</text>
+          <rect x="150" y="106" width="12" height="24" fill="var(--boundary)"/>
+          <rect x="162" y="106" width="140" height="24" rx="2" fill="var(--lan)" opacity=".7"/>
+          <text x="312" y="123" font-size="10.5" fill="var(--ink-soft)" class="num">
+            first byte 3.3s &mdash; prefill is not the problem
+          </text>
+
+          <!-- row 3 -->
+          <text x="138" y="174" text-anchor="end" font-size="11.5" font-weight="600"
+                fill="currentColor">non-streaming</text>
+          <text x="138" y="188" text-anchor="end" font-size="10" fill="var(--ink-soft)">long generation</text>
+          <rect x="150" y="160" width="230" height="24" fill="var(--boundary)" opacity=".8"/>
+          <rect x="380" y="160" width="8" height="24" rx="2" fill="var(--lan)" opacity=".7"/>
+          <rect x="388" y="160" width="215" height="24" fill="var(--boundary)" opacity=".28"/>
+          <text x="222" y="176" font-size="10" font-weight="600" fill="#fff">silent 61s</text>
+          <text x="609" y="176" font-size="10.5" fill="var(--boundary)">
+            a longer one dies here
+          </text>
+
+          <!-- legend -->
+          <rect x="150" y="8" width="10" height="10" fill="var(--boundary)" opacity=".8"/>
+          <text x="166" y="17" font-size="10" fill="var(--ink-soft)">origin silent</text>
+          <rect x="252" y="8" width="10" height="10" fill="var(--lan)" opacity=".7"/>
+          <text x="268" y="17" font-size="10" fill="var(--ink-soft)">bytes flowing</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>
+      Measured through the tunnel on 4&nbsp;Sep&nbsp;2026. The cutoff counts
+      <b>silence, not duration</b> &mdash; once bytes flow the connection is held open
+      indefinitely. A streaming request is therefore effectively immune; a buffered one has a
+      120&thinsp;s budget. Time spent <b>queued</b> counts as silence too, which is how
+      concurrent agents trigger this even when every individual request is fast.
+    </figcaption>
+  </figure>
+
+  <section class="notes">
+    <div class="note bnd">
+      <h3>The one that bites</h3>
+      <p>
+        vLLM on <span class="mono">:8000</span> has no auth at all. LiteLLM is the entire
+        security boundary &mdash; anything that exposes <span class="mono">:8000</span> beyond
+        the LAN exposes the cluster with no key.
+      </p>
+    </div>
+    <div class="note pub">
+      <h3>Kill switch</h3>
+      <p>
+        Power off the OrangePi and the public endpoint disappears. LAN serving keeps running
+        untouched, and nothing on the Spark nodes had to change to expose them in the first
+        place.
+      </p>
+    </div>
+    <div class="note lan">
+      <h3>Why an IP, not a name</h3>
+      <p>
+        The connector's origin is <span class="mono">192.168.7.103</span> because cloudflared
+        uses Go's resolver and cannot resolve mDNS <span class="mono">.local</span> names. It
+        is a DHCP lease, so a reservation is still owed.
+      </p>
+    </div>
+  </section>
+
+</div>
