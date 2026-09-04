@@ -1,6 +1,6 @@
 ---
 id: "002"
-title: Push SPARK_API_KEY to ws1 (was offline)
+title: Push SPARK_API_KEY to ws1 and macbook (were offline)
 status: active
 priority: medium
 created: 2026-09-03
@@ -8,30 +8,34 @@ created: 2026-09-03
 
 # Finish the fleet rollout
 
-Rolled out 2026-09-03 via `computers/fleet-push.sh`:
+Secret distribution is now part of `computers/fleet-deploy.sh` (it copies
+`~/.fleet-secrets.sh` at 0600 from the operator's home). Rolled out 2026-09-03:
 
 | Machine | Status |
 |---------|--------|
-| Csabas-Mac-Pro | done |
-| server-opi5p | done |
-| macbook | done |
-| **ws1** | **pending — unreachable (connection timed out)** |
+| macpro | done |
+| opi | done |
+| spark-db71 | done |
+| spark-7ceb | done |
+| macbook | key delivered; missed the later aliases update (asleep) |
+| **ws1** | **pending - unreachable** |
 
-Until ws1 gets the key, `claude-local` and the `local-llm` plugin there will fail with
-401: it still carries the old file with `ANTHROPIC_API_KEY=vllm` hardcoded, and LiteLLM
-now enforces auth.
+`fleet-check.sh` reports `ok` with no drift for every reachable machine.
 
-## Do this when it's up
+Until ws1 gets the key, `claude-local` and the `local-llm` plugin there fail with 401:
+it carries the old file with `ANTHROPIC_API_KEY=vllm` hardcoded, and the proxy now
+enforces auth.
+
+## Do this when they are up
 
 ```bash
-~/my-projects/computers/fleet-push.sh ws1
+~/my-projects/computers/fleet-deploy.sh        # all reachable machines
+~/my-projects/computers/fleet-check.sh         # confirm no DRIFT
 ```
-
-Skips unreachable hosts, safe to run repeatedly.
 
 ## Acceptance Criteria
 
-- [ ] ws1: `fleet_llm_model` returns the served model
+- [ ] `fleet-check.sh` shows `ok` for ws1 and macbook
+- [ ] `fleet_llm_status` on each returns the served model
+- [ ] macbook verified **off the LAN** (falls back to `https://spark.devquasar.com`)
 - [ ] Old `ANTHROPIC_API_KEY=vllm` gone from ws1
-- [ ] macbook: re-push for route-printout update (has key, works, just older aliases)
-- [ ] macbook re-verified **off the LAN** (should fall back to `https://spark.devquasar.com`)

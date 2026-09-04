@@ -2,7 +2,7 @@
 # computers/fleet-aliases.sh — CANONICAL source for ~/.fleet-aliases.sh
 #
 # MANAGED FILE — identical on every machine. Edit THIS file in the myprojects
-# tracker, then redistribute (see computers/README-fleet.md).
+# tracker, then redistribute (see computers/FLEET-MANAGEMENT.md).
 # Secrets never live here; they come from ~/.fleet-secrets.sh (chmod 600, not in git).
 
 # --- secrets ----------------------------------------------------------------
@@ -78,7 +78,7 @@ claude-local() {
   _base=$(fleet_llm_base)
 
   if [ -z "$SPARK_API_KEY" ]; then
-    echo "Error: SPARK_API_KEY unset - is ~/.fleet-secrets.sh installed? (fleet-push.sh)" >&2
+    echo "Error: SPARK_API_KEY unset - is ~/.fleet-secrets.sh installed? (fleet-deploy.sh)" >&2
     return 1
   fi
 

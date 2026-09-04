@@ -296,16 +296,34 @@ Not a fleet bug as such, but it bit these scripts twice.
 Provided by `~/.fleet-aliases.sh` on every machine:
 
 ```sh
-fleet_llm_model     # prints the model the cluster is serving, or nothing
+fleet_llm_base      # which endpoint we would use right now
+fleet_llm_model     # the model the cluster is serving, or nothing
+fleet_llm_status    # all of the above plus auth state, without launching anything
 claude-local        # runs Claude Code against that model via the proxy
 ```
 
 ```
 $ claude-local
-Using model: deepseek-ai/DeepSeek-V4-Flash
+claude-local
+  route     LAN     (direct, on the home network)
+  endpoint  http://spark-db71.local:4000
+  model     local-model
 ```
 
+**The proxy requires a key since 2026-09-03.** `SPARK_API_KEY` comes from
+`~/.fleet-secrets.sh` (see section 7). Without it every call returns 401 —
+`fleet_llm_status` will say so rather than failing obscurely.
+
+**Endpoint selection is automatic.** `fleet_llm_base` probes the LAN with a 1s
+timeout and falls back to the Cloudflare tunnel (`https://spark.devquasar.com`),
+so the same config works at home and while travelling. The probe happens at call
+time, never at shell startup. Force it with `fleet_use_lan` / `fleet_use_remote`,
+back to probing with `fleet_use_auto`.
+
 `FLEET_LLM_HOST` (default `spark-db71.local`) overrides the cluster host.
+
+Full infrastructure detail — the cluster, the tunnel, key rotation — is in
+[../ai-infra/](../ai-infra/README.md).
 
 **`LOCAL_LLM_MODEL` is deliberately unset.** Pinning a model name means it goes
 stale the moment the cluster loads something else — which already happened
@@ -361,6 +379,13 @@ The fleet's **data** is excluded even though the tooling is committed:
 |---|---|
 | collected public keys | identifies every machine and account in one file |
 | collected host keys | same, and regenerable with `ssh-keyscan` |
+| `~/.fleet-secrets.sh` | holds `SPARK_API_KEY`, the LLM proxy master key. A real secret, not merely sensitive inventory |
+
+`~/.fleet-secrets.sh` (0600) is distributed by `fleet-deploy.sh` **from the
+operator's own home directory**, never from this repo. `.gitignore` blocks
+`*fleet-secrets*`, `.env`, `*.key` and `*.pem` as a backstop, but the rule is
+*copy it over scp, never commit it*. Rotation procedure:
+[../ai-infra/auth-and-secrets.md](../ai-infra/auth-and-secrets.md).
 
 Public keys are not secrets, but they are the "mildly sensitive inventory" case
 from [the `fleetz` idea](../ideas/fleetz.md): the generator is publishable, the
@@ -379,6 +404,7 @@ roadmap) that is where they belong. Regenerate rather than store.
 | `README.md` inventory is hand-written | should be generated from `fleet.json`; the two can drift |
 | `.bak.*` files accumulate | every install leaves timestamped backups on every machine |
 | No deployment record | the repo holds tooling, not a log of what was installed where and when |
+| One shared LLM master key | every machine and person uses the same `SPARK_API_KEY`, so revoking one consumer means rotating for all. LiteLLM virtual keys would fix it but need a database |
 
 All of these are what [the `fleetz` idea](../ideas/fleetz.md) exists to close —
 turning this directory into a proper generator published to `skill-vault`.
@@ -387,6 +413,8 @@ turning this directory into a proper generator published to `skill-vault`.
 
 ## Related
 
+- [../ai-infra/](../ai-infra/README.md) — the DGX Spark cluster, the public
+  endpoint, auth and the operational runbook
 - [README.md](./README.md) — machine inventory: hardware, roles, tiers
 - [the `fleetz` idea](../ideas/fleetz.md) — generalising this into a skill
 - [the `sync-dev-environment` goal](../goals/sync-dev-environment.md)

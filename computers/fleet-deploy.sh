@@ -21,9 +21,16 @@ FLEET_JSON="$HERE/fleet.json"
 PAYLOAD="fleet-prompt.sh fleet-aliases.sh"
 TOOLS="fleet.json fleet_ssh_install.py fleet_rc_install.py"
 
+# Secrets are NOT in this repo (see FLEET-MANAGEMENT.md section 7). They are
+# taken from the operator's own home directory and pushed at 0600. Skipped
+# with a warning if absent, so a machine without them still gets everything
+# else - it will just fail auth against the LLM proxy until they arrive.
+SECRETS="$HOME/.fleet-secrets.sh"
+
 deploy_local() {
   cp "$HERE/fleet-prompt.sh"  ~/.fleet-prompt.sh
   cp "$HERE/fleet-aliases.sh" ~/.fleet-aliases.sh
+  [ -f "$SECRETS" ] || echo "  WARNING: no $SECRETS on this machine"
   printf "  rc:  "; python3 "$HERE/fleet_rc_install.py"
   printf "  ssh: "; python3 "$HERE/fleet_ssh_install.py"
 }
@@ -53,6 +60,12 @@ for h in $TARGETS; do
   fi
   ( cd "$HERE" && scp -q $PAYLOAD "$h:/tmp/" && scp -q $TOOLS "$h:/tmp/" ) || {
     echo "  copy failed"; echo; continue; }
+  if [ -f "$SECRETS" ]; then
+    scp -q "$SECRETS" "$h:~/.fleet-secrets.sh" && ssh -n "$h" 'chmod 600 ~/.fleet-secrets.sh' \
+      && echo "  sec: ok" || echo "  sec: FAILED"
+  else
+    echo "  sec: skipped (none on this machine)"
+  fi
   ssh -n "$h" '
     cp /tmp/fleet-prompt.sh  ~/.fleet-prompt.sh
     cp /tmp/fleet-aliases.sh ~/.fleet-aliases.sh
