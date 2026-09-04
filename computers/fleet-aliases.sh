@@ -42,24 +42,60 @@ alias fleet_use_auto='unset FLEET_LLM_FORCE'
 # Model currently served by the cluster. Prints nothing if it is down.
 # Goes through LiteLLM (:4000) so it works over the tunnel too, and so it needs
 # the master key - vLLM's own :8000 is LAN-only and unauthenticated.
+# Takes an optional base URL so callers that already resolved one don't re-probe.
 fleet_llm_model() {
-  curl -s --max-time 3 "$(fleet_llm_base)/v1/models" \
+  _base="${1:-$(fleet_llm_base)}"
+  curl -s --max-time 5 "${_base}/v1/models" \
     -H "Authorization: Bearer ${SPARK_API_KEY}" 2>/dev/null |
     grep -o '"id":"[^"]*"' | grep -v '"id":"claude-\*"' | head -1 | cut -d'"' -f4
 }
 
+# Human-readable label for how we are reaching the cluster.
+fleet_llm_route() {
+  case "$1" in
+    "$FLEET_LLM_FORCE")       echo "FORCED  (FLEET_LLM_FORCE set)" ;;
+    "$SPARK_BASE_URL_LAN")    echo "LAN     (direct, on the home network)" ;;
+    "$SPARK_BASE_URL_REMOTE") echo "TUNNEL  (Cloudflare -> OrangePi -> cluster)" ;;
+    *)                        echo "CUSTOM" ;;
+  esac
+}
+
+# Show how the local model is being reached, without starting anything.
+fleet_llm_status() {
+  _base=$(fleet_llm_base)
+  _model=$(fleet_llm_model "$_base")
+  printf '  route     %s\n' "$(fleet_llm_route "$_base")"
+  printf '  endpoint  %s\n' "$_base"
+  printf '  model     %s\n' "${_model:-<none - cluster down or key rejected>}"
+  printf '  auth      SPARK_API_KEY %s\n' \
+    "$([ -n "$SPARK_API_KEY" ] && echo "$(printf '%s' "$SPARK_API_KEY" | cut -c1-14)..." || echo '<UNSET>')"
+  [ -n "$_model" ]
+}
+
 # Run Claude Code against whatever the cluster is currently serving.
+# LAN first, Cloudflare tunnel as fallback, master key either way.
 claude-local() {
-  base=$(fleet_llm_base)
-  model=$(fleet_llm_model)
-  if [ -z "$model" ]; then
-    echo "Error: no model available at ${base} (cluster down, or SPARK_API_KEY unset/stale)"
+  _base=$(fleet_llm_base)
+
+  if [ -z "$SPARK_API_KEY" ]; then
+    echo "Error: SPARK_API_KEY unset - is ~/.fleet-secrets.sh installed? (fleet-push.sh)" >&2
     return 1
   fi
-  echo "Using model: $model  via $base"
-  ANTHROPIC_BASE_URL="$base" \
+
+  _model=$(fleet_llm_model "$_base")
+  if [ -z "$_model" ]; then
+    echo "Error: no model at ${_base} (cluster down, or SPARK_API_KEY stale -> 401)" >&2
+    return 1
+  fi
+
+  printf 'claude-local\n'
+  printf '  route     %s\n' "$(fleet_llm_route "$_base")"
+  printf '  endpoint  %s\n' "$_base"
+  printf '  model     %s\n\n' "$_model"
+
+  ANTHROPIC_BASE_URL="$_base" \
   ANTHROPIC_API_KEY="$SPARK_API_KEY" \
-  claude --model "$model" "$@"
+  claude --model "$_model" "$@"
 }
 
 # Consumed by the local-llm skill-vault plugin.

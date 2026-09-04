@@ -33,4 +33,5 @@ Skips unreachable hosts, safe to run repeatedly.
 
 - [ ] ws1: `fleet_llm_model` returns the served model
 - [ ] Old `ANTHROPIC_API_KEY=vllm` gone from ws1
+- [ ] macbook: re-push for route-printout update (has key, works, just older aliases)
 - [ ] macbook re-verified **off the LAN** (should fall back to `https://spark.devquasar.com`)
