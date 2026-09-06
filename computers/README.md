@@ -20,7 +20,7 @@ fleet**, including infrastructure nodes that host no repos.
 | **MacBook Pro** | Mac17,7, **M5 Max, 128 GB** unified | macOS 26.6 | Travel, mobile dev, steward failover | **A** (unified memory) |
 | **AI workstation** | **RTX PRO 6000 Blackwell 96 GB + RTX 5090 32 GB, 1 TB DDR5** | Ubuntu 26.04 LTS | Heavy compute, quantization, fine-tuning | **A++** |
 | **DGX Spark ×2** *(→ ×4)* | NVIDIA GB10, 128 GB unified each, 200 Gbps network | DGX OS | Local LLM inference (vLLM) | **A+** |
-| **OrangePi 5 Plus** | RK3588, ARM64 | Linux | Always-on services, rack display | **C** |
+| **OrangePi 5 Plus** | RK3588, ARM64 | Linux | Always-on services, rack display, public endpoint connector | **C** |
 
 ### Tier scale
 
@@ -143,14 +143,22 @@ tooling, common tasks, troubleshooting, and how to rebuild from scratch — is i
 Quick reference:
 
 ```sh
-cd ~/myprojects/computers
+cd "$(grep tracker_repo ~/.projectz.yaml | awk '{print $2}' | sed "s|~|$HOME|")/computers"
 ./fleet-check.sh        # is the fleet in the state I think it is?
 ./fleet-deploy.sh       # push managed config everywhere
 ./fleet-bootstrap.sh    # build passwordless SSH (keys, host keys)
 ```
 
+> The clone path is **not** uniform — `~/my-projects` on the Mac Pro,
+> `~/myprojects` on ws1. `~/.projectz.yaml` records it per machine, which is why
+> the snippet above reads it rather than hardcoding a path.
+
 `fleet.json` in this directory is the single source of truth for addressing.
 Edit it, then deploy — never hand-edit config on a machine.
+
+`fleet-deploy.sh` also carries `~/.fleet-secrets.sh` (0600) from the operator's
+home directory to each machine. That file holds `SPARK_API_KEY` and is
+**never** in this repo — run the deploy from a machine that already has it.
 
 Connectivity is a **full mesh**: every machine reaches every other without a
 password or prompt. Matrix and security notes in the management doc.
@@ -202,12 +210,21 @@ delay 30 s, second in priority after the OrangePi.
 
 ### DGX Spark ×2 — local LLM inference · tier A+
 
-`spark-7ceb` (192.168.4.77) · `spark-db71` (192.168.7.103)
+`spark-7ceb` (192.168.4.62) · `spark-db71` (192.168.7.103) — **wired** `enP7s7`.
 NVIDIA GB10, **128 GB unified memory each, 200 Gbps network**.
 
-The `local-llm-self-sufficiency` substrate. Serves models via **vLLM**, with
-OpenAI-compatible endpoints the router consumes directly. Rack-mounted with
-the OrangePi (see `dgx-spark-tiny-rack`).
+> ⚠️ Both Sparks also hold a **WiFi** address on the same `/22`
+> (`spark-db71` `192.168.7.116`, `spark-7ceb` `192.168.7.251`). Both answer, so
+> it is easy to wire something to the wrong one — the Cloudflare tunnel origin
+> was briefly pointed at the WiFi address. Always use the wired `enP7s7` address.
+
+The `local-llm-self-sufficiency` substrate. Serves models via **vLLM**, fronted
+by a **LiteLLM** proxy on `:4000` that is the fleet's inference endpoint and the
+only component that checks the API key. vLLM's own `:8000` is unauthenticated
+and must stay on the LAN. Reachable from anywhere via `spark.devquasar.com`.
+
+Full topology, auth and runbook: **[../ai-infra/](../ai-infra/README.md)**.
+Rack-mounted with the OrangePi (see `dgx-spark-tiny-rack`).
 
 Not projectz-registered — infrastructure, no repos.
 
@@ -222,6 +239,11 @@ The only machine that is always on, which makes it the default steward host
   systemd unit and a remote)*
 - **`quasar-deck`** GUI — cluster monitoring on the GeeekPi 6.91" 1424×280
   rack LCD, autostarted on boot
+- **`cloudflared`** — the `spark-cluster` tunnel serving
+  `spark.devquasar.com` → the head node's LiteLLM. User systemd unit
+  (`systemctl --user cloudflared-spark.service`), no sudo, no inbound port.
+  Deliberately here and not on a Spark: **powering this box off is the kill
+  switch for public access**, and LAN serving is unaffected
 - **steward** — once Phase 6 lands
 
 Tier C: mechanical work only. Never enriches — bad tags are worse than none.
@@ -242,6 +264,7 @@ provide no inference at all.
 | LLM inference serving | DGX Spark ×2, AI workstation, MacBook Pro |
 | Always-on services | OrangePi 5 Plus |
 | Physical display | OrangePi 5 Plus (rack LCD) |
+| Public endpoint connector | OrangePi 5 Plus (`spark.devquasar.com`) |
 | Steward host (priority order) | OrangePi → AI workstation → MacBook |
 
 ## Open items
@@ -253,6 +276,11 @@ provide no inference at all.
       `ai-workstation.local` is unsafe to use from either Spark
 - [ ] Give the workstation's `192.168.7.117` a DHCP reservation — it is pinned
       by address, so a lease change silently breaks `ws1`
+- [ ] Give **spark-db71's `192.168.7.103`** a DHCP reservation too — the
+      Cloudflare tunnel origin is pinned to that address because cloudflared
+      cannot resolve mDNS `.local` names, so a lease change silently 502s the
+      public endpoint. Considered alongside giving the rack its own subnet:
+      `projects/dgx-spark-tiny-rack/tasks/001-static-addressing-tiny-rack.md`
 - [x] ~~Rename `workstation2deb12`~~ — now `AI-workstation` (2026-08-10)
 - [ ] Decide hostnames **before** Tailscale enrolment, not after
 - [x] ~~Deploy to the AI workstation~~ — done 2026-08-10, fleet is 6/6
